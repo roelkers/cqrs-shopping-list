@@ -4,7 +4,7 @@ import Button from '@material-ui/core/Button';
 import './App.css';
 
 function App() {
-  const [events, setEvents] = useState([]);
+  const [shoppingList, setShoppingList] = useState([]);
   const [listening, setListening] = useState(false);
 
   useEffect(() => {
@@ -14,17 +14,18 @@ function App() {
         const parsedData = JSON.parse(event.data);
         console.log("message arrived")
         console.log(parsedData)
-        setEvents((events) => events.concat(parsedData));
+        setShoppingList(parsedData);
       };
 
       setListening(true);
     }
-  }, [listening, events]);
+  }, [listening, shoppingList]);
 
   const sendEvent = () => {
     const payload = JSON.stringify({ 
-        id: Math.floor(Math.random() * 1000),
-        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
+        productId: Math.floor(Math.random() * 1000),
+        listId: 1,
+        type: 'item_added'
     })
     fetch('http://localhost:5000/events', {
       method: 'POST',
@@ -38,9 +39,9 @@ function App() {
   return (
     <div>
       <div>
-        {events.map((event: any) => {
+        {shoppingList.map((item: any) => {
           return (
-            <p key={event.id}>Id: {event.id}</p>
+            <p key={item.id}>Id: {item.id}</p>
           )
         })
       }

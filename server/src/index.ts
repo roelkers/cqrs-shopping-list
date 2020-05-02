@@ -1,5 +1,5 @@
 import express from "express";
-import keys from "./keys";
+import pgClient from './pgClient'
 import router from './router'
 
 // Express App Setup
@@ -9,20 +9,14 @@ import cors from "cors";
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-app.use(router)
+app.use('error', () => console.log('Lost PG connection'));
 
-// Postgres Client Setup
-const { Pool } = require('pg');
-const pgClient = new Pool({
-  user: keys.pgUser,
-  host: keys.pgHost,
-  database: keys.pgDatabase,
-  password: keys.pgPassword,
-  port: keys.pgPort
-});
-pgClient.on('error', () => console.log('Lost PG connection'));
+pgClient.connect(async () => {
+  pgClient.on('error', () => console.log('Lost PG connection'));
+  app.use(router)
+  app.listen(5000, async (err) => {
+    console.log("Listening");
+    console.log("refresh")
+  });
 
-app.listen(5000, async (err) => {
-  console.log("Listening");
-
-});
+})
