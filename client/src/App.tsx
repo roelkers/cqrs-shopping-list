@@ -1,53 +1,51 @@
 import React from 'react';
 import { useEffect, useState } from 'react'
-import Button from '@material-ui/core/Button';
+import { ThemeProvider, createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles'
+import orange from '@material-ui/core/colors/orange'
+import green from '@material-ui/core/colors/green'
+import AppPage from './AppPage'
 import './App.css';
+import { postEvent, createEventSource, getShoppingLists } from './client';
+import { IShoppingItem, IShoppingList } from './interfaces';
+
+let theme = createMuiTheme({
+  palette: {
+    primary: green,
+    secondary: orange
+  }
+})
+theme = responsiveFontSizes(theme)
+
 
 function App() {
-  const [shoppingList, setShoppingList] = useState([]);
+  const [listItems, setListItems] = useState<IShoppingItem[]>([]);
   const [listening, setListening] = useState(false);
+  const [listId, setListId ] = useState(1)
+  const [shoppingLists, setShoppingLists] = React.useState<IShoppingList[]>([])
 
   useEffect(() => {
     if (!listening) {
-      const eventSource = new EventSource('http://localhost:5000/events');
+      const eventSource = createEventSource(listId) 
       eventSource.onmessage = (event) => {
-        const parsedData = JSON.parse(event.data);
+        const parsedData = JSON.parse(event.data) as IShoppingItem[];
         console.log("message arrived")
         console.log(parsedData)
-        setShoppingList(parsedData);
+        setListItems(parsedData);
       };
 
       setListening(true);
     }
-  }, [listening, shoppingList]);
+  }, [listening, listItems]);
 
-  const sendEvent = () => {
-    const payload = JSON.stringify({ 
-        productId: Math.floor(Math.random() * 1000),
-        listId: 1,
-        type: 'item_added'
-    })
-    fetch('http://localhost:5000/events', {
-      method: 'POST',
-      body: payload,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-  }
+  useEffect(() => {
+    getShoppingLists()
+    .then((res) => setShoppingLists(res.data))
+  },[])
 
   return (
-    <div>
-      <div>
-        {shoppingList.map((item: any) => {
-          return (
-            <p key={item.id}>Id: {item.id}</p>
-          )
-        })
-      }
-      </div>
-      <Button onClick={sendEvent} color='primary'>Add Event</Button>
-    </div>
+    <ThemeProvider theme={theme}>
+      <AppPage shoppingLists={shoppingLists} listId={listId} setListId={setListId} listItems={listItems} />
+    </ThemeProvider>
   );
 }
 

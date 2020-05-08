@@ -9,7 +9,6 @@ import cors from "cors";
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-app.use('error', () => console.log('Lost PG connection'));
 
 pgClient.connect(async () => {
   pgClient.on('error', () => console.log('Lost PG connection'));

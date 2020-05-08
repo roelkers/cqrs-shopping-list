@@ -5,10 +5,11 @@ const router = express.Router()
 
 let clients: any[] = []
 
-const getShoppingList = async () => {
-    const res = await pgClient.query('SELECT product_id, list_id from shopping_list WHERE list_id=1')
+const getShoppingList = async (id: string) => {
+    const res = await pgClient.query('SELECT product_id, list_id from shopping_list WHERE list_id=$1',[id])
     const data = res.rows.map((item: any) => ({
-        id: item.product_id
+        id: item.product_id,
+        name: item.product_name
     }))
     return data 
 }
@@ -24,10 +25,11 @@ router.post('/events', async (req: Request, res: Response, next: NextFunction) =
     res.json(newEvent)
 
     // Invoke iterate and send function
-    return sendEventsToAll();
+    return sendEventsToAll(listId);
 })
 
-router.get('/events', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/events/:id', async (req: Request, res: Response, next: NextFunction) => {
+    const { id: listId } = req.params
     // Mandatory headers and http status to keep connection open
     const headers = {
         'Content-Type': 'text/event-stream',
@@ -38,7 +40,7 @@ router.get('/events', async (req: Request, res: Response, next: NextFunction) =>
     res.writeHead(200, headers);
     res.write('\n');
 
-    const shoppingList = await getShoppingList()
+    const shoppingList = await getShoppingList(listId)
     console.log(shoppingList)
     // After client opens connection send all nests as string
     const data = `data: ${JSON.stringify(shoppingList)}\n\n`;
@@ -64,9 +66,9 @@ router.get('/events', async (req: Request, res: Response, next: NextFunction) =>
 })
 
 // Iterate clients list and use write res object method to send new nest
-async function sendEventsToAll() {
+async function sendEventsToAll(listId: string) {
     console.log("sending event to all clients")
-    const data = await getShoppingList()
+    const data = await getShoppingList(listId)
 
     clients.forEach(c => { c.res.write(`data: ${JSON.stringify(data)}\n\n`); c.res.flush() })
 }

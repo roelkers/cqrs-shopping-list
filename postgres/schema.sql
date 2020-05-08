@@ -2,7 +2,6 @@ DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS events CASCADE;
 DROP TABLE IF EXISTS shopping_lists CASCADE;
 DROP TABLE IF EXISTS shopping_lists_products CASCADE;
-DROP TRIGGER IF EXISTS event_trigger ON events;
 DROP VIEW IF EXISTS shopping_list;
 
 CREATE TABLE shopping_lists (
