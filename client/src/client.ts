@@ -2,14 +2,15 @@ import { IApiProduct } from "./interfaces"
 
 const BASE_API = 'http://localhost:5000'
 
-export const postEvent = (event: any) =>
+export const postEvent = (event: any) => {
     fetch(`${BASE_API}/events`, {
         method: 'POST',
-        body: JSON.parse(event),
+        body: JSON.stringify(event),
         headers: {
             'Content-Type': 'application/json'
         }
     })
+}
 
 export const createEventSource = (listId: number) => new EventSource(`${BASE_API}/events/${listId}`)
 

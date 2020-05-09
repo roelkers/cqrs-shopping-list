@@ -8,24 +8,55 @@ import List from '@material-ui/core/List'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
 import LocalCafeIcon from '@material-ui/icons/LocalCafe'
-
+import { makeStyles } from '@material-ui/core/styles'
+import clsx from 'clsx'
+import { postEvent } from './client'
 
 interface ShoppingListProps extends RouteComponentProps {
   listItems: IShoppingItem[];
   listId: number;
 }
 
+const useStyles = makeStyles((theme) => {
+  return ({
+    listItemChecked: {
+      background: theme.palette.secondary.light!,
+      textDecoration: 'line-through'
+    },
+    listItem: {
+      "&:hover, &.Mui-focusVisible": { background: theme.palette.primary.light! }
+    }
+  })
+});
+
 export default function ShoppingList(props: ShoppingListProps) {
   const { listItems } = props
+  const { listItem, listItemChecked } = useStyles()
+
+  const handleClick =  (item: IShoppingItem) => {
+    const payload = {
+      listId: props.listId,
+      productId: item.id,
+      type: ''
+    }
+    if (item.checked) {
+      payload.type = 'item_unchecked'
+    } else {
+      payload.type = 'item_checked'
+    }
+    return postEvent(payload);
+  }
 
   return (
-    <Box width='100%' display='flex' flexDirection='column' justifyContent='center'>
-      <MuiLink component={Link} to='edit'>Bearbeiten</MuiLink>
+    <Box >
+      <Box p={2}>
+        <MuiLink align='center' display='block' component={Link} to='edit'>Bearbeiten</MuiLink>
+      </Box>
       <List>
         {
           listItems.map((item) => {
             return (
-              <ListItem key={item.id} button>
+              <ListItem onClick={() => handleClick(item)} key={item.id} className={clsx(listItem, item.checked ? listItemChecked: '')} button>
                 <ListItemIcon>
                   <LocalCafeIcon />
                 </ListItemIcon>

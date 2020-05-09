@@ -25,14 +25,34 @@ CREATE TABLE products (
 DROP VIEW IF EXISTS shopping_list;
 CREATE OR REPLACE VIEW shopping_list AS
 (
-WITH added_items as ( SELECT data->>'product_id' as product_id, global_id, list_id FROM events WHERE data->>'type'='item_added'),
-     removed_items as ( SELECT data->>'product_id' as product_id, global_id, list_id FROM events WHERE data->>'type'='item_removed')	
+	WITH
+	added_items as (
+	SELECT * FROM (
+		SELECT data->>'product_id' as product_id, global_id, list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='item_added'
+    ) as ss WHERE pos=1),
+	removed_items as (
+	SELECT * FROM (
+		SELECT data->>'product_id' as product_id, global_id, list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='item_removed'	
+	) as sd WHERE pos=1),
+	checked_items as (
+	SELECT * FROM (
+		SELECT data->>'product_id' as product_id, global_id, list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='item_checked'
+    ) as ss WHERE pos=1),
+	unchecked_items as (
+	SELECT * FROM (
+		SELECT data->>'product_id' as product_id, global_id, list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='item_unchecked'	
+	) as sd WHERE pos=1)
 SELECT 
 	DISTINCT ON (added_items.product_id, added_items.list_id) 
-	added_items.list_id,added_items.product_id, products.product_name, products.category, added_items.global_id 
+	added_items.list_id,added_items.product_id, products.product_name, products.category, added_items.global_id,
+	(checked_items.product_id IS NOT NULL AND (unchecked_items.product_id IS NULL OR checked_items.global_id > unchecked_items.global_id)) as checked
+	, 
 	FROM added_items
 	LEFT JOIN products ON products.id=added_items.product_id::integer 	
 	LEFT JOIN removed_items ON added_items.product_id=removed_items.product_id AND added_items.list_id=removed_items.list_id
+	LEFT JOIN checked_items ON added_items.product_id=checked_items.product_id AND added_items.list_id=checked_items.list_id
+	LEFT JOIN unchecked_items ON added_items.product_id=unchecked_items.product_id AND added_items.list_id=unchecked_items.list_id
+
 	WHERE removed_items.product_id IS NULL OR added_items.global_id>removed_items.global_id
 );
 
@@ -44,3 +64,6 @@ INSERT INTO shopping_lists(id) VALUES (1);
 INSERT INTO events(list_id, data) VALUES (1, '{"type": "item_added", "product_id": "3"}');
 INSERT INTO events(list_id, data) VALUES (1, '{"type": "item_added", "product_id": "4"}');
 INSERT INTO events(list_id, data) VALUES (1, '{"type": "item_removed", "product_id": "3"}');
+INSERT INTO events(list_id, data) VALUES (1, '{"type": "item_checked", "product_id": "3"}');
+INSERT INTO events(list_id, data) VALUES (1, '{"type": "item_unchecked", "product_id": "3"}');
+INSERT INTO events(list_id, data) VALUES (1, '{"type": "item_checked", "product_id": "3"}');

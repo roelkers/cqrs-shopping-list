@@ -7,26 +7,33 @@ import ListItem from '@material-ui/core/ListItem'
 import MuiLink from '@material-ui/core/Link'
 import List from '@material-ui/core/List'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
+import CheckIcon from '@material-ui/icons/Check'
 import ListItemText from '@material-ui/core/ListItemText'
 import LocalCafeIcon from '@material-ui/icons/LocalCafe'
+import { makeStyles } from '@material-ui/core/styles'
+import clsx from 'clsx'
 
 interface MenuProps extends RouteComponentProps {
   listItems: IShoppingItem[],
   listId: number
 }
 
-const sendEvent = () => {
-  const payload = JSON.stringify({
-    productId: Math.floor(Math.random() * 1000),
-    listId: 1,
-    type: 'item_added'
+const useStyles = makeStyles((theme) => {
+  return ({
+    listItemChecked: {
+      background: theme.palette.secondary.light!
+    },
+    listItem: {
+      "&:hover, &.Mui-focusVisible": { background: theme.palette.primary.light! }
+    }
   })
-  return postEvent(payload)
-}
+});
 
 export default function Menu(props: MenuProps) {
   const { listItems } = props
   const [products, setProducts] = useState<IProduct[]>([])
+  const { listItem, listItemChecked } = useStyles()
+
   useEffect(() => {
     getProducts()
       .then(res => {
@@ -43,19 +50,35 @@ export default function Menu(props: MenuProps) {
         setProducts(newProducts)
       })
   }, [listItems])
-  
+
+  const handleClick = (product: IProduct) => {
+    const payload = {
+      listId: props.listId,
+      productId: product.id,
+      type: ''
+    }
+    if (product.selected) {
+      payload.type = 'item_removed'
+    } else {
+      payload.type = 'item_added'
+    }
+    return postEvent(payload);
+  }
+
   return (
     <Box>
-      <MuiLink component={Link} to={`/list/${props.listId}`}>Fertig</MuiLink>
+      <Box p={2}>
+        <MuiLink align='center' display='block' component={Link} to={`/list/${props.listId}`}>Fertig</MuiLink>
+      </Box>
       <List>
         {
           products.map((product) => {
             return (
-              <ListItem key={product.id} button>
+              <ListItem onClick={() => handleClick(product)} className={clsx(listItem, product.selected ? listItemChecked: '')} key={product.id} button>
                 <ListItemIcon>
                   <LocalCafeIcon />
                 </ListItemIcon>
-                <ListItemText primary={product.id} />{product.selected && 'jey'}
+                <ListItemText primary={product.id} />{product.selected && <CheckIcon />}
               </ListItem>
             )
           })
