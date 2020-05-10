@@ -1,7 +1,8 @@
 export interface IShoppingItem {
     id: string;
     name: string;
-    checked: boolean
+    checked: boolean;
+    category: string;
 }
 
 export interface IShoppingList {

@@ -60,7 +60,7 @@ export default function ShoppingList(props: ShoppingListProps) {
                 <ListItemIcon>
                   <LocalCafeIcon />
                 </ListItemIcon>
-                <ListItemText primary={item.id} />
+                <ListItemText primary={item.name} />
               </ListItem>
             )
           })

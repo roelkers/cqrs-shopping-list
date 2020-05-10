@@ -78,7 +78,7 @@ export default function Menu(props: MenuProps) {
                 <ListItemIcon>
                   <LocalCafeIcon />
                 </ListItemIcon>
-                <ListItemText primary={product.id} />{product.selected && <CheckIcon />}
+                <ListItemText primary={product.name} />{product.selected && <CheckIcon />}
               </ListItem>
             )
           })
