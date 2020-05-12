@@ -36,17 +36,17 @@ CREATE OR REPLACE VIEW shopping_list AS
 	) as sd WHERE pos=1),
 	checked_items as (
 	SELECT * FROM (
-		SELECT data->>'product_id' as product_id, global_id, list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='item_checked'
+		SELECT data->>'product_id' as product_id, global_id, list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id) as pos FROM events WHERE data->>'type'='item_checked'
     ) as ss WHERE pos=1),
 	unchecked_items as (
 	SELECT * FROM (
-		SELECT data->>'product_id' as product_id, global_id, list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='item_unchecked'	
+		SELECT data->>'product_id' as product_id, global_id, list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id) as pos FROM events WHERE data->>'type'='item_unchecked'	
 	) as sd WHERE pos=1)
 SELECT 
 	DISTINCT ON (added_items.product_id, added_items.list_id) 
 	added_items.list_id,added_items.product_id, products.product_name, products.category, added_items.global_id,
 	(checked_items.product_id IS NOT NULL AND (unchecked_items.product_id IS NULL OR checked_items.global_id > unchecked_items.global_id)) as checked
-	, 
+	, checked_items.global_id as cgid, unchecked_items.global_id as ugid
 	FROM added_items
 	LEFT JOIN products ON products.id=added_items.product_id::integer 	
 	LEFT JOIN removed_items ON added_items.product_id=removed_items.product_id AND added_items.list_id=removed_items.list_id

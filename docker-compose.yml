@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile.dev
       context: ./server
     volumes:
-      - /app/src/node_modules
+      - /app/node_modules
       - ./server:/app
     environment:
       - PGUSER=postgres
@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile.dev
       context: ./client
     volumes:
-      - /app/src/node_modules
+      - /app/node_modules
       - ./client:/app
     ports:
       - "3000:3000"

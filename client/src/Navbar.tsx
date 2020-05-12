@@ -30,9 +30,9 @@ export default function Navbar() {
               <MenuIcon />
              </IconButton>
             <Typography variant="h6" className={classes.title}>
-              Einkauf-App 
+              Einkauf-App
           </Typography>
-            <Button color="inherit">Login</Button>
+            <Button color="inherit">Login.</Button>
         </Toolbar>
       </AppBar>
     </Box>

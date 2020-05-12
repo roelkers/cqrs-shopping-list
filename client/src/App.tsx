@@ -5,7 +5,7 @@ import orange from '@material-ui/core/colors/orange'
 import green from '@material-ui/core/colors/green'
 import AppPage from './AppPage'
 import './App.css';
-import { postEvent, createEventSource, getShoppingLists } from './client';
+import { createEventSource, getShoppingLists } from './client';
 import { IShoppingItem, IShoppingList } from './interfaces';
 
 let theme = createMuiTheme({
