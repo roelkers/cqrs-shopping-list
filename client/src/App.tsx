@@ -26,12 +26,27 @@ function App() {
   useEffect(() => {
     if (!listening) {
       const eventSource = createEventSource(listId) 
-      eventSource.onmessage = (event) => {
+      eventSource.onmessage = async (event) => {
         const parsedData = JSON.parse(event.data) as IShoppingItem[];
         console.log("message arrived")
         console.log(parsedData)
+        const jsonResponse = new Response(event.data, {
+          headers: {
+            'content-type': 'application/json'
+          }
+        })
+        const cache = await window.caches.open('shoppinglist')
+        await cache.put(`/events/${listId}`, jsonResponse ).catch(e => console.log(e))
+        console.log("added to cache !")
         setListItems(parsedData);
       };
+      eventSource.onerror = async (error) => {
+        const data = await window.caches.match(`/events/${listId}`)
+        const jsonData = await data?.json()
+        console.log("using cached data:")
+        console.log(jsonData)
+        setListItems(jsonData);
+      }
 
       setListening(true);
     }
@@ -42,9 +57,14 @@ function App() {
     .then((res) => setShoppingLists(res.data))
   },[])
 
+  const checkListItem = (id: string) => {
+    const newItems = listItems.map(item => item.id === id ? ({ ...item, checked: !item.checked }) : item)
+    setListItems(newItems)
+  }
+
   return (
     <ThemeProvider theme={theme}>
-      <AppPage shoppingLists={shoppingLists} listId={listId} setListId={setListId} listItems={listItems} />
+      <AppPage shoppingLists={shoppingLists} listId={listId} setListId={setListId} listItems={listItems} checkListItem={checkListItem} />
     </ThemeProvider>
   );
 }

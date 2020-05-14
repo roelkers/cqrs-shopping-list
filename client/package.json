@@ -13,14 +13,15 @@
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
+    "cra-append-sw": "^2.7.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
     "typescript": "~3.7.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "react-scripts start && yarn cra-append-sw --mode dev ./src/custom-sw.js",
+    "build": "react-scripts build && yarn cra-append-sw ./src/custom-sw.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

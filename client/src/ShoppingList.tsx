@@ -15,6 +15,7 @@ import { postEvent } from './client'
 interface ShoppingListProps extends RouteComponentProps {
   listItems: IShoppingItem[];
   listId: number;
+  checkListItem: (id: string) => void
 }
 
 const useStyles = makeStyles((theme) => {
@@ -34,6 +35,7 @@ export default function ShoppingList(props: ShoppingListProps) {
   const { listItem, listItemChecked } = useStyles()
 
   const handleClick =  (item: IShoppingItem) => {
+    props.checkListItem(item.id)
     const payload = {
       listId: props.listId,
       productId: item.id,

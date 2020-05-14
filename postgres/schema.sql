@@ -21,7 +21,6 @@ CREATE TABLE products (
     product_name TEXT NOT NULL
 );
 
-
 DROP VIEW IF EXISTS shopping_list;
 CREATE OR REPLACE VIEW shopping_list AS
 (
@@ -46,7 +45,7 @@ SELECT
 	DISTINCT ON (added_items.product_id, added_items.list_id) 
 	added_items.list_id,added_items.product_id, products.product_name, products.category, added_items.global_id,
 	(checked_items.product_id IS NOT NULL AND (unchecked_items.product_id IS NULL OR checked_items.global_id > unchecked_items.global_id)) as checked
-	, 
+	, checked_items.global_id as cgid, unchecked_items.global_id as ugid
 	FROM added_items
 	LEFT JOIN products ON products.id=added_items.product_id::integer 	
 	LEFT JOIN removed_items ON added_items.product_id=removed_items.product_id AND added_items.list_id=removed_items.list_id
