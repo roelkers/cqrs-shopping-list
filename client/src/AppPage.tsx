@@ -10,7 +10,8 @@ interface AppPageProps {
     listItems: IShoppingItem[],
     listId: number,
     setListId: any,
-    shoppingLists: IShoppingList[]
+    shoppingLists: IShoppingList[],
+    checkListItem: (id: string) => void
 }
 
 export default function AppPage (props: AppPageProps) {
@@ -18,7 +19,7 @@ export default function AppPage (props: AppPageProps) {
         <>
           <Navbar />
           <Router >
-              <ShoppingList listId={props.listId} listItems={props.listItems} path="/list/:id" />
+              <ShoppingList listId={props.listId} listItems={props.listItems} checkListItem={props.checkListItem} path="/list/:id" />
               <ListConfig  listId={props.listId} listItems={props.listItems} path="/list/:id/edit" />
               <Menu shoppingLists={props.shoppingLists} path="/menu" />
           </Router>

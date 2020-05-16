@@ -21,7 +21,6 @@ CREATE TABLE products (
     product_name TEXT NOT NULL
 );
 
-
 DROP VIEW IF EXISTS shopping_list;
 CREATE OR REPLACE VIEW shopping_list AS
 (

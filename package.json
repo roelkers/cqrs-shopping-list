@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "@reach/router": "^1.3.3"
-  },
-  "devDependencies": {
-    "@types/reach__router": "^1.3.5"
-  }
-}
