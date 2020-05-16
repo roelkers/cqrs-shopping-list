@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Box from '@material-ui/core/Box'
 import { RouteComponentProps, Link } from "@reach/router"
 import { IShoppingItem } from './interfaces'
@@ -14,7 +14,9 @@ import { postEvent } from './client'
 
 interface ShoppingListProps extends RouteComponentProps {
   listItems: IShoppingItem[];
-  listId: number;
+  listId: string;
+  id?: string
+  setListId: (id: string) => void
   checkListItem: (id: string) => void
 }
 
@@ -31,14 +33,21 @@ const useStyles = makeStyles((theme) => {
 });
 
 export default function ShoppingList(props: ShoppingListProps) {
-  const { listItems } = props
+  const { listItems,listId,setListId } = props
   const { listItem, listItemChecked } = useStyles()
+
+  useEffect(() => {
+    //check if list id from route is the same as current list id,
+    //if not then change it to the currently selected
+    console.log(props.id)
+    if(props.id && props.id !== listId) setListId(props.id)
+  },[listId,setListId])
 
   const handleClick =  (item: IShoppingItem) => {
     props.checkListItem(item.id)
     const payload = {
-      listId: props.listId,
-      productId: item.id,
+      list_id: props.listId,
+      product_id: item.id,
       type: ''
     }
     if (item.checked) {

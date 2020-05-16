@@ -5,8 +5,8 @@ import orange from '@material-ui/core/colors/orange'
 import green from '@material-ui/core/colors/green'
 import AppPage from './AppPage'
 import './App.css';
-import { createEventSource, getShoppingLists } from './client';
-import { IShoppingItem, IShoppingList } from './interfaces';
+import { createEventSource, getShoppingLists, getProducts } from './client';
+import { IShoppingItem, IShoppingList, IProduct } from './interfaces';
 
 let theme = createMuiTheme({
   palette: {
@@ -20,8 +20,9 @@ theme = responsiveFontSizes(theme)
 function App() {
   const [listItems, setListItems] = useState<IShoppingItem[]>([]);
   const [listening, setListening] = useState(false);
-  const [listId, setListId ] = useState(1)
+  const [listId, setNewListId ] = useState('1')
   const [shoppingLists, setShoppingLists] = React.useState<IShoppingList[]>([])
+  const [products, setProducts] = useState<IProduct[]>([])
 
   useEffect(() => {
     if (!listening) {
@@ -47,15 +48,50 @@ function App() {
         console.log(jsonData)
         setListItems(jsonData);
       }
-
+      
       setListening(true);
     }
-  }, [listening, listItems]);
+  }, [listening, listItems, listId]);
 
   useEffect(() => {
     getShoppingLists()
     .then((res) => setShoppingLists(res.data))
   },[])
+
+  useEffect(() => {
+    getProducts().
+    then(res => {
+      const newProducts: IProduct[] = res.data
+      .map(product => {
+        return ({
+          id: String(product.id),
+          name: product.product_name,
+          category: product.category,
+          selected: listItems.some(i => i.id === `${product.id}`)
+        })
+      })
+
+      setProducts(newProducts)      
+    })
+  })
+
+  useEffect(() => {
+    const newProducts: IProduct[] = products 
+    .map(product => {
+      return ({
+        id: String(product.id),
+        name: product.name,
+        category: product.category,
+        selected: listItems.some(i => i.id === `${product.id}`)
+      })
+    })
+    setProducts(newProducts)     
+  },[listItems])
+
+  const setListId = (id: string) => {
+    setListening(false)
+    setNewListId(id)
+  }
 
   const checkListItem = (id: string) => {
     const newItems = listItems.map(item => item.id === id ? ({ ...item, checked: !item.checked }) : item)
@@ -64,7 +100,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppPage shoppingLists={shoppingLists} listId={listId} setListId={setListId} listItems={listItems} checkListItem={checkListItem} />
+      <AppPage products={products} shoppingLists={shoppingLists} listId={listId} setListId={setListId} listItems={listItems} checkListItem={checkListItem} />
     </ThemeProvider>
   );
 }

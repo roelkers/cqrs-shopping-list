@@ -3,14 +3,10 @@ DROP TABLE IF EXISTS events CASCADE;
 DROP TABLE IF EXISTS shopping_lists CASCADE;
 DROP TABLE IF EXISTS shopping_lists_products CASCADE;
 DROP VIEW IF EXISTS shopping_list;
-
-CREATE TABLE shopping_lists (
-    id SERIAL PRIMARY KEY,
-    event_seq_no SERIAL
-);
+DROP VIEW IF EXISTS lists;
+DROP SEQUENCE IF EXISTS list_id_seq;
 
 CREATE TABLE events(
-    list_id INTEGER REFERENCES shopping_lists(id),
     global_id SERIAL PRIMARY KEY,
     data JSONB NOT NULL
 );
@@ -20,26 +16,36 @@ CREATE TABLE products (
     category TEXT NOT NULL,
     product_name TEXT NOT NULL
 );
+CREATE SEQUENCE list_id_seq START WITH 2;
 
-DROP VIEW IF EXISTS shopping_list;
+CREATE OR REPLACE VIEW lists AS
+(
+	WITH
+	added_lists as (
+	SELECT * FROM (
+		SELECT data->>'list_id' as id,  data->>'name' as name, global_id, rank() OVER (PARTITION BY data->>'list_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='list_added'
+    ) as ss WHERE pos=1)
+	SELECT id, name FROM added_lists
+);
+
 CREATE OR REPLACE VIEW shopping_list AS
 (
 	WITH
 	added_items as (
 	SELECT * FROM (
-		SELECT data->>'product_id' as product_id, global_id, list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='item_added'
+		SELECT data->>'product_id' as product_id, global_id, data->>'list_id' as list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='item_added'
     ) as ss WHERE pos=1),
 	removed_items as (
 	SELECT * FROM (
-		SELECT data->>'product_id' as product_id, global_id, list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='item_removed'	
+		SELECT data->>'product_id' as product_id, global_id, data->>'list_id' as list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='item_removed'	
 	) as sd WHERE pos=1),
 	checked_items as (
 	SELECT * FROM (
-		SELECT data->>'product_id' as product_id, global_id, list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id) as pos FROM events WHERE data->>'type'='item_checked'
+		SELECT data->>'product_id' as product_id, global_id, data->>'list_id' as list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='item_checked'
     ) as ss WHERE pos=1),
 	unchecked_items as (
 	SELECT * FROM (
-		SELECT data->>'product_id' as product_id, global_id, list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id) as pos FROM events WHERE data->>'type'='item_unchecked'	
+		SELECT data->>'product_id' as product_id, global_id, data->>'list_id' as list_id, rank() OVER (PARTITION BY data->>'product_id' ORDER BY global_id DESC) as pos FROM events WHERE data->>'type'='item_unchecked'	
 	) as sd WHERE pos=1)
 SELECT 
 	DISTINCT ON (added_items.product_id, added_items.list_id) 
@@ -59,10 +65,10 @@ INSERT INTO products(id, product_name, category) VALUES (1,'Brot', 'Backwaren');
 INSERT INTO products(id, product_name, category) VALUES (2,'Milch', 'Milchprodukte');
 INSERT INTO products(id, product_name, category) VALUES (3,'Bananen', 'Obst & Gemüse');
 INSERT INTO products(id, product_name, category) VALUES (4,'Äpfel', 'Obst & Gemüse');
-INSERT INTO shopping_lists(id) VALUES (1);
-INSERT INTO events(list_id, data) VALUES (1, '{"type": "item_added", "product_id": "3"}');
-INSERT INTO events(list_id, data) VALUES (1, '{"type": "item_added", "product_id": "4"}');
-INSERT INTO events(list_id, data) VALUES (1, '{"type": "item_removed", "product_id": "3"}');
-INSERT INTO events(list_id, data) VALUES (1, '{"type": "item_checked", "product_id": "3"}');
-INSERT INTO events(list_id, data) VALUES (1, '{"type": "item_unchecked", "product_id": "3"}');
-INSERT INTO events(list_id, data) VALUES (1, '{"type": "item_checked", "product_id": "3"}');
+INSERT INTO events(data) VALUES ('{"list_id": "1","type": "list_added", "name": "my list"}');
+INSERT INTO events(data) VALUES ('{"list_id": "1","type": "item_added", "product_id": "3"}');
+INSERT INTO events(data) VALUES ('{"list_id": "1","type": "item_added", "product_id": "4"}');
+INSERT INTO events(data) VALUES ('{"list_id": "1","type": "item_removed", "product_id": "3"}');
+INSERT INTO events(data) VALUES ('{"list_id": "1","type": "item_checked", "product_id": "3"}');
+INSERT INTO events(data) VALUES ('{"list_id": "1","type": "item_unchecked", "product_id": "3"}');
+INSERT INTO events(data) VALUES ('{"list_id": "1","type": "item_checked", "product_id": "3"}');

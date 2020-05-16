@@ -4,12 +4,13 @@ import ShoppingList from './ShoppingList'
 import ListConfig from './ListConfig'
 import Menu from './Menu'
 import Navbar from './Navbar'
-import { IShoppingItem, IShoppingList } from './interfaces'
+import { IShoppingItem, IShoppingList, IProduct } from './interfaces'
 
 interface AppPageProps {
     listItems: IShoppingItem[],
-    listId: number,
-    setListId: any,
+    products: IProduct[],
+    listId: string,
+    setListId: (id: string) => void,
     shoppingLists: IShoppingList[],
     checkListItem: (id: string) => void
 }
@@ -19,8 +20,8 @@ export default function AppPage (props: AppPageProps) {
         <>
           <Navbar />
           <Router >
-              <ShoppingList listId={props.listId} listItems={props.listItems} checkListItem={props.checkListItem} path="/list/:id" />
-              <ListConfig  listId={props.listId} listItems={props.listItems} path="/list/:id/edit" />
+              <ShoppingList listId={props.listId} listItems={props.listItems} checkListItem={props.checkListItem} setListId={props.setListId} path="/list/:id" />
+              <ListConfig products={props.products} listId={props.listId} listItems={props.listItems} path="/list/:id/edit" />
               <Menu shoppingLists={props.shoppingLists} path="/menu" />
           </Router>
         </>

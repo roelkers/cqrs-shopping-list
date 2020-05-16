@@ -6,6 +6,7 @@ const router = express.Router()
 let clients: any[] = []
 
 const getShoppingList = async (id: string) => {
+    console.log("id",id)
     const res = await pgClient.query('SELECT product_id, product_name, list_id, category, checked from shopping_list WHERE list_id=$1',[id])
     const data = res.rows.map((item: any) => ({
         id: item.product_id,
@@ -18,16 +19,21 @@ const getShoppingList = async (id: string) => {
 
 // Middleware for POST /nest endpoint
 router.post('/events', async (req: Request, res: Response, next: NextFunction) => {
-    const { productId, type, listId } = req.body
-    const newEvent = { type, product_id: productId, list_id: listId }
-    console.log(newEvent)
-    await pgClient.query('INSERT INTO events(list_id,data) VALUES ($1,$2)',[listId, JSON.stringify(newEvent)])
+    const { type } = req.body 
+    const event = { ...req.body }
+    if(type === 'list_added') {
+       const { rows } = await pgClient.query(`SELECT nextval('list_id_seq')`)
+       console.log(rows)
+       event.list_id = rows[0].nextval
+    }
+    await pgClient.query('INSERT INTO events(data) VALUES ($1)',[JSON.stringify(event)])
     // Send recently added nest as POST result
 
-    res.json(newEvent)
-
+    res.sendStatus(200)
     // Invoke iterate and send function
-    return sendEventsToAll(listId);
+    if(req.body.list_id) {
+      return sendEventsToAll(req.body.list_id);
+    }
 })
 
 router.get('/events/:id', async (req: Request, res: Response, next: NextFunction) => {

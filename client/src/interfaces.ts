@@ -7,6 +7,7 @@ export interface IShoppingItem {
 
 export interface IShoppingList {
     id: string;
+    name: string;
 }
 
 export interface IApiProduct {

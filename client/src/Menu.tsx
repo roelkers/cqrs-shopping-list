@@ -13,9 +13,17 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import StarBorder from '@material-ui/icons/StarBorder';
 import Collapse from '@material-ui/core/Collapse';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import { IShoppingList } from './interfaces'
 import { getShoppingLists } from './client'
 import { Link } from '@reach/router'
+import { postEvent } from './client'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,17 +37,39 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface MenuProps extends RouteComponentProps  {
-  shoppingLists: IShoppingList[]
+  shoppingLists: IShoppingList[],
 }
 
 export default function Menu(props: MenuProps) {
 
 const classes = useStyles();
   const [open, setOpen] = React.useState(true);
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [newListTitle, setNewListTitle] = React.useState('')
+
+  const handleDialogOpen = () => {
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
 
   const handleClick = () => {
     setOpen(!open);
   };
+  
+  const handleNewList = () => {
+    console.log(newListTitle)
+    handleDialogClose()
+    if(!newListTitle.trim()) return;
+    setNewListTitle('')
+    const payload = {
+      type: 'list_added',
+      name: newListTitle,
+    }
+    return postEvent(payload);
+  }
 
   return (
     <Box className={classes.root}>
@@ -48,7 +78,7 @@ const classes = useStyles();
           <ListItemIcon>
             <AddIcon />
           </ListItemIcon>
-          <ListItemText primary="Neuer Einkaufszettel" />
+          <ListItemText onClick={handleDialogOpen} primary="Neuer Einkaufszettel" />
         </ListItem>
         <ListItem button onClick={handleClick}>
           <ListItemIcon>
@@ -66,7 +96,7 @@ const classes = useStyles();
                 <ListItemIcon>
                   <StarBorder />
                 </ListItemIcon>
-                <ListItemText primary={list.id} />
+                <ListItemText primary={list.name} />
               </ListItem>
               )
             })
@@ -80,6 +110,32 @@ const classes = useStyles();
           <ListItemText primary="Löschen" />
         </ListItem>
       </List>
+      <Dialog open={dialogOpen} onClose={handleDialogClose} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Neue Liste</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+           Bitte gib den Namen deiner Einkaufsliste ein. 
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            value={newListTitle}
+            label="Name"
+            type="name"
+            fullWidth
+            onChange={(event) => setNewListTitle(event.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="primary">
+            Zurück 
+          </Button>
+          <Button onClick={handleNewList} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

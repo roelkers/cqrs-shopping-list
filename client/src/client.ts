@@ -12,7 +12,7 @@ export const postEvent = (event: any) => {
     })
 }
 
-export const createEventSource = (listId: number) => new EventSource(`${BASE_API}/events/${listId}`)
+export const createEventSource = (listId: string) => new EventSource(`${BASE_API}/events/${listId}`)
 
 export const getShoppingLists = () => fetch(`${BASE_API}/lists`).then((res)=> res.json())
 
