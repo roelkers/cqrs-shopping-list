@@ -1,6 +1,6 @@
 import { IApiProduct } from "./interfaces"
 
-const BASE_API = process.env.REACT_APP_BASE_URL
+const BASE_API = process.env.NODE_ENV === 'production' ? 'https://shopping-list-cqrs.herokuapp.com' : 'http://localhost:5000'
 
 export const postEvent = (event: any) => {
     fetch(`${BASE_API}/events`, {
