@@ -5,4 +5,4 @@ setup:
   config: {}
 build:
   docker:
-    web: ./server/Dockerfile
+    web: server/Dockerfile
