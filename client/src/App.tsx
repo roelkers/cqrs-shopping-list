@@ -20,7 +20,7 @@ theme = responsiveFontSizes(theme)
 function App() {
   const [listData, setListItems] = useState<Map<string,IShoppingItem[]>>(new Map());
   const [listening, setListening] = useState(false);
-  const [listId, setNewListId ] = useState('1')
+  const [listId, setListId ] = useState('1')
   const [shoppingLists, setShoppingLists] = React.useState<IShoppingList[]>([])
   const [products, setProducts] = useState<IProduct[]>([])
 
@@ -77,7 +77,7 @@ function App() {
 
       setProducts(newProducts)      
     })
-  })
+  },[])
 
   useEffect(() => {
     const newProducts: IProduct[] = products 
@@ -90,12 +90,7 @@ function App() {
       })
     })
     setProducts(newProducts)     
-  },[])
-
-  const setListId = (id: string) => {
-    setListening(false)
-    setNewListId(id)
-  }
+  },[listItems])
 
   const checkListItem = (id: string) => {
     const newItems = listItems.map(item => item.id === id ? ({ ...item, checked: !item.checked }) : item)
