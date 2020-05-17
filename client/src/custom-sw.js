@@ -7,7 +7,7 @@ if (workbox) {
   console.log(`Boo! Workbox didn't load 😬`);
 }
 
-const BASE_URL = process.env.NODE_ENV === 'production' ? 'https://shopping-list-cqrs.herokuapp.com' : 'http://localhost:5000'
+const BASE_URL = process.env.REACT_APP_BASE_URL
 
 const bgSyncPlugin = new workbox.backgroundSync.Plugin('eventQueue', {
   maxRetentionTime: 24 * 60
