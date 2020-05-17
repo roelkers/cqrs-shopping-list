@@ -1,5 +1,4 @@
 /server/node_modules
 /server/dist
-/server/public
 /client/node_modules
 /client/build
