@@ -1,7 +1,7 @@
 import keys from "./keys";
 
 // Postgres Client Setup
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 const pgClient = new Pool({
   user: keys.pgUser,
   host: keys.pgHost,
@@ -10,4 +10,4 @@ const pgClient = new Pool({
   port: keys.pgPort
 });
 
-export default pgClient
+export default pgClient;

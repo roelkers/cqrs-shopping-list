@@ -1,12 +1,12 @@
-import { Router } from 'express'
-import events from './events'
-import products from './products'
-import lists from './lists'
+import { Router } from "express";
+import events from "./events";
+import lists from "./lists";
+import products from "./products";
 
-const router = Router()
+const router = Router();
 
-router.use(events)
-router.use(products)
-router.use(lists)
+router.use(events);
+router.use(products);
+router.use(lists);
 
-export default router
+export default router;
