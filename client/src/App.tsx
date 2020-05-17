@@ -18,7 +18,7 @@ theme = responsiveFontSizes(theme)
 
 
 function App() {
-  const [listItems, setListItems] = useState<IShoppingItem[]>([]);
+  const [listData, setListItems] = useState<Map<string,IShoppingItem[]>>(new Map());
   const [listening, setListening] = useState(false);
   const [listId, setNewListId ] = useState('1')
   const [shoppingLists, setShoppingLists] = React.useState<IShoppingList[]>([])
@@ -26,9 +26,9 @@ function App() {
 
   useEffect(() => {
     if (!listening) {
-      const eventSource = createEventSource(listId) 
+      const eventSource = createEventSource() 
       eventSource.onmessage = async (event) => {
-        const parsedData = JSON.parse(event.data) as IShoppingItem[];
+        const parsedData = JSON.parse(event.data) as any
         console.log("message arrived")
         console.log(parsedData)
         const jsonResponse = new Response(event.data, {
@@ -39,19 +39,23 @@ function App() {
         const cache = await window.caches.open('shoppinglist')
         await cache.put(`/events/${listId}`, jsonResponse ).catch(e => console.log(e))
         console.log("added to cache !")
-        setListItems(parsedData);
+        const map = new Map(Object.entries(parsedData))
+        setListItems(map);
       };
       eventSource.onerror = async (error) => {
         const data = await window.caches.match(`/events/${listId}`)
         const jsonData = await data?.json()
         console.log("using cached data:")
         console.log(jsonData)
-        setListItems(jsonData);
+        const map = new Map(Object.entries(jsonData))
+        setListItems(map);
       }
       
       setListening(true);
     }
-  }, [listening, listItems, listId]);
+  }, [listening, listData]);
+
+  const listItems = listData.get(listId) || [] as IShoppingItem[]
 
   useEffect(() => {
     getShoppingLists()
@@ -86,7 +90,7 @@ function App() {
       })
     })
     setProducts(newProducts)     
-  },[listItems])
+  },[])
 
   const setListId = (id: string) => {
     setListening(false)
@@ -95,7 +99,8 @@ function App() {
 
   const checkListItem = (id: string) => {
     const newItems = listItems.map(item => item.id === id ? ({ ...item, checked: !item.checked }) : item)
-    setListItems(newItems)
+    const updatedMap = listData.set(listId,newItems) 
+    setListItems(updatedMap)
   }
 
   return (

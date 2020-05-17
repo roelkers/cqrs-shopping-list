@@ -7,6 +7,8 @@ if (workbox) {
   console.log(`Boo! Workbox didn't load 😬`);
 }
 
+const BASE_URL = process.env.REACT_APP_BASE_URL
+
 const bgSyncPlugin = new workbox.backgroundSync.Plugin('eventQueue', {
   maxRetentionTime: 24 * 60
 });
@@ -17,19 +19,19 @@ workbox.routing.registerRoute(
 )
 
 workbox.routing.registerRoute(
-  'http://localhost:5000/lists',
+  `${BASE_URL}/lists`,
   workbox.strategies.networkFirst(),
   'GET'
 )
 
 workbox.routing.registerRoute(
-  'http://localhost:5000/products',
+  `${BASE_URL}/products`,
   workbox.strategies.networkFirst(),
   'GET'
 )
 
 workbox.routing.registerRoute(
-  'http://localhost:5000/events',
+  `${BASE_URL}/events`,
   workbox.strategies.networkFirst({
     plugins: [bgSyncPlugin]
   }),

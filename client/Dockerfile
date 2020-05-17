@@ -1,7 +1,7 @@
 FROM node:alpine
+ENV REACT_APP_BASE_URL=localhost:5000
 WORKDIR '/app'
 COPY ./package.json ./
 RUN yarn
 COPY . .
-ENV REACT_APP_BASE_URL=http://localhost:5000
 CMD ["yarn", "run", "start"]

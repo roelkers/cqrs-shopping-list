@@ -1,6 +1,6 @@
 import { IApiProduct } from "./interfaces"
 
-const BASE_API = 'http://localhost:5000'
+const BASE_API = process.env.REACT_APP_BASE_URL
 
 export const postEvent = (event: any) => {
     fetch(`${BASE_API}/events`, {
@@ -12,7 +12,7 @@ export const postEvent = (event: any) => {
     })
 }
 
-export const createEventSource = (listId: string) => new EventSource(`${BASE_API}/events/${listId}`)
+export const createEventSource = () => new EventSource(`${BASE_API}/list-data`)
 
 export const getShoppingLists = () => fetch(`${BASE_API}/lists`).then((res)=> res.json())
 
