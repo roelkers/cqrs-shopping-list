@@ -98,6 +98,8 @@ function App() {
     setListItems(updatedMap)
   }
 
+  console.log(process.env.REACT_APP_BASE_URL)
+
   return (
     <ThemeProvider theme={theme}>
       <AppPage products={products} shoppingLists={shoppingLists} listId={listId} setListId={setListId} listItems={listItems} checkListItem={checkListItem} />
