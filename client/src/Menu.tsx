@@ -34,18 +34,23 @@ const useStyles = makeStyles((theme) => ({
   nested: {
     paddingLeft: theme.spacing(4),
   },
+  isDeleted: {
+    backgroundColor: theme.palette.secondary.dark,
+  }
 }));
 
-interface MenuProps extends RouteComponentProps  {
+interface MenuProps extends RouteComponentProps {
   shoppingLists: IShoppingList[],
 }
 
 export default function Menu(props: MenuProps) {
 
-const classes = useStyles();
+  const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [newListTitle, setNewListTitle] = React.useState('')
+  const [listToDelete, selectListToDelete] = React.useState('')
 
   const handleDialogOpen = () => {
     setDialogOpen(true);
@@ -55,18 +60,36 @@ const classes = useStyles();
     setDialogOpen(false);
   };
 
+  const handleDeleteOpen = () => {
+    setDeleteOpen(true);
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteOpen(false);
+  };
+
   const handleClick = () => {
     setOpen(!open);
   };
-  
+
   const handleNewList = () => {
-    console.log(newListTitle)
     handleDialogClose()
-    if(!newListTitle.trim()) return;
+    if (!newListTitle.trim()) return;
     setNewListTitle('')
     const payload = {
       type: 'list_added',
       name: newListTitle,
+    }
+    return postEvent(payload);
+  }
+
+  const handleListDelete = () => {
+    handleDialogClose()
+    if (!listToDelete.trim()) return;
+    selectListToDelete('')
+    const payload = {
+      type: 'list_removed',
+      list_id: listToDelete
     }
     return postEvent(payload);
   }
@@ -90,31 +113,31 @@ const classes = useStyles();
         <Collapse in={open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {
-            props.shoppingLists.map(list => {
-            return (
-              <ListItem key={list.id} component={Link} to={`/list/${list.id}`} button className={classes.nested}>
-                <ListItemIcon>
-                  <StarBorder />
-                </ListItemIcon>
-                <ListItemText primary={list.name} />
-              </ListItem>
-              )
-            })
-          }
+              props.shoppingLists.map(list => {
+                return (
+                  <ListItem key={list.id} component={Link} to={`/list/${list.id}`} button className={classes.nested}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary={list.name} />
+                  </ListItem>
+                )
+              })
+            }
           </List>
         </Collapse>
       </List>
       <Divider />
       <List component="nav" aria-label="secondary mailbox folders">
         <ListItem button>
-          <ListItemText primary="Löschen" />
+          <ListItemText onClick={handleDeleteOpen} primary="Löschen" />
         </ListItem>
       </List>
       <Dialog open={dialogOpen} onClose={handleDialogClose} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Neue Liste</DialogTitle>
         <DialogContent>
           <DialogContentText>
-           Bitte gib den Namen deiner Einkaufsliste ein. 
+            Bitte gib den Namen deiner Einkaufsliste ein.
           </DialogContentText>
           <TextField
             autoFocus
@@ -129,9 +152,39 @@ const classes = useStyles();
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDialogClose} color="primary">
-            Zurück 
+            Zurück
           </Button>
           <Button onClick={handleNewList} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={deleteOpen} onClose={handleDeleteClose} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Liste löschen</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Welche Liste möchtest du löschen?
+          </DialogContentText>
+          <List>
+            {props.shoppingLists.map(list => {
+              const isDeleted = listToDelete === list.id
+              return (
+                <ListItem key={list.id} onClick={() => selectListToDelete(list.id)} button className={isDeleted ? classes.isDeleted : ''}>
+                  <ListItemIcon>
+                    <StarBorder />
+                  </ListItemIcon>
+                  <ListItemText primary={list.name} />
+                </ListItem>
+              )
+            })
+            }
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteClose} color="primary">
+            Zurück
+          </Button>
+          <Button onClick={handleListDelete} color="primary">
             OK
           </Button>
         </DialogActions>
