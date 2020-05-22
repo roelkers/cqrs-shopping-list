@@ -82,12 +82,13 @@ export default function Menu(props: MenuProps) {
           products
           .filter((product: IProduct) => activeCategories.length > 0 ? activeCategories.includes(product.category) : true )
           .map((product: IProduct) => {
+            const selected = listItems.some(item => item.id === product.id)
             return (
-              <ListItem onClick={() => handleClick(product)} className={clsx(listItem, product.selected ? listItemChecked: '')} key={product.id} button>
+              <ListItem onClick={() => handleClick(product)} className={clsx(listItem, selected ? listItemChecked: '')} key={product.id} button>
                 <ListItemIcon>
                   <LocalCafeIcon />
                 </ListItemIcon>
-                <ListItemText primary={product.name} />{product.selected && <CheckIcon />}
+                <ListItemText primary={product.name} />{selected && <CheckIcon />}
               </ListItem>
             )
           })

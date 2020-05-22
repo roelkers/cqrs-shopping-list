@@ -23,7 +23,7 @@ function App() {
   const [listId, setListId ] = useState('1')
   const [shoppingLists, setShoppingLists] = React.useState<IShoppingList[]>([])
   const [products, setProducts] = useState<IProduct[]>([])
-
+  
   useEffect(() => {
     if (!listening) {
       const eventSource = createEventSource() 
@@ -65,6 +65,7 @@ function App() {
   useEffect(() => {
     getProducts().
     then(res => {
+      console.log(res.data)
       const newProducts: IProduct[] = res.data
       .map(product => {
         return ({
@@ -74,23 +75,10 @@ function App() {
           selected: listItems.some(i => i.id === `${product.id}`)
         })
       })
-
+      console.log(newProducts)
       setProducts(newProducts)      
     })
   },[])
-
-  useEffect(() => {
-    const newProducts: IProduct[] = products 
-    .map(product => {
-      return ({
-        id: String(product.id),
-        name: product.name,
-        category: product.category,
-        selected: listItems.some(i => i.id === `${product.id}`)
-      })
-    })
-    setProducts(newProducts)     
-  },[listItems])
 
   const checkListItem = (id: string) => {
     const newItems = listItems.map(item => item.id === id ? ({ ...item, checked: !item.checked }) : item)
@@ -99,7 +87,6 @@ function App() {
   }
 
   console.log(process.env.REACT_APP_BASE_URL)
-
   return (
     <ThemeProvider theme={theme}>
       <AppPage products={products} shoppingLists={shoppingLists} listId={listId} setListId={setListId} listItems={listItems} checkListItem={checkListItem} />
