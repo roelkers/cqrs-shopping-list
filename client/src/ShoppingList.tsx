@@ -43,7 +43,6 @@ export default function ShoppingList(props: ShoppingListProps) {
   useEffect(() => {
     //check if list id from route is the same as current list id,
     //if not then change it to the currently selected
-    console.log(props.id)
     if (props.id && props.id !== listId) setListId(props.id)
   }, [listId, setListId, props.id])
 

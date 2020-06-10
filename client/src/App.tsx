@@ -78,7 +78,6 @@ function App() {
   useEffect(() => {
     getProducts()
     .then(res => {
-      console.log(res.data)
       const newProducts: IProduct[] = res.data
       .map(product => {
         return ({
@@ -90,7 +89,7 @@ function App() {
       })
       setProducts(newProducts)      
     })
-  },[listId,listItems])
+  },[])
 
   const checkListItem = (id: string) => {
     const newItems = listItems.map(item => item.id === id ? ({ ...item, checked: !item.checked }) : item)
