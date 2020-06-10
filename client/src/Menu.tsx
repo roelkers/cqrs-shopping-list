@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import Box from '@material-ui/core/Box'
 import ListItem from '@material-ui/core/ListItem'
 import List from '@material-ui/core/List'
@@ -21,7 +21,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { IShoppingList } from './interfaces'
-import { getShoppingLists } from './client'
 import { Link } from '@reach/router'
 import { postEvent } from './client'
 

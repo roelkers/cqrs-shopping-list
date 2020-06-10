@@ -1,8 +1,6 @@
 import React from 'react';
 import { useEffect, useState } from 'react'
 import { ThemeProvider, createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles'
-import orange from '@material-ui/core/colors/orange'
-import green from '@material-ui/core/colors/green'
 import AppPage from './AppPage'
 import './App.css';
 import { createEventSource, getShoppingLists, getProducts } from './client';
@@ -10,8 +8,22 @@ import { IShoppingItem, IShoppingList, IProduct } from './interfaces';
 
 let theme = createMuiTheme({
   palette: {
-    primary: green,
-    secondary: orange
+    primary: {
+      main: '#57DBBE',
+      light: '#80FFE3'
+    },
+    secondary: {
+      main: '#915540',
+      light: '#DF9379'
+    }
+  },
+  typography: {
+    fontFamily: 
+      `
+      Roboto Mono,
+      Roboto,
+      sans-serif
+      `
   }
 })
 theme = responsiveFontSizes(theme)
@@ -29,30 +41,32 @@ function App() {
       const eventSource = createEventSource() 
       eventSource.onmessage = async (event) => {
         const parsedData = JSON.parse(event.data) as any
-        console.log("message arrived")
         const jsonResponse = new Response(event.data, {
           headers: {
             'content-type': 'application/json'
           }
         })
-        const cache = await window.caches.open('shoppinglist')
-        await cache.put(`/events/${listId}`, jsonResponse ).catch(e => console.log(e))
-        console.log("added to cache !")
         const map = new Map(Object.entries(parsedData))
         setListItems(map);
+        //update cache if we have access to it
+        if(window.caches) {
+          const cache = await window.caches.open('shoppinglist')
+          await cache.put(`/events/${listId}`, jsonResponse ).catch(e => console.log(e))
+        }
       };
       eventSource.onerror = async (error) => {
-        const data = await window.caches.match(`/events/${listId}`)
-        const jsonData = await data?.json()
-        console.log("using cached data:")
-        console.log(jsonData)
-        const map = new Map(Object.entries(jsonData))
-        setListItems(map);
+        //use cache if we have access to it
+        if(window.caches) {
+          const data = await window.caches.match(`/events/${listId}`)
+          const jsonData = await data?.json()
+          const map = new Map(Object.entries(jsonData))
+          setListItems(map);
+        }
       }
       
       setListening(true);
     }
-  }, [listening, listData]);
+  }, [listening, listData, listId]);
 
   const listItems = listData.get(listId) || [] as IShoppingItem[]
 
@@ -62,8 +76,8 @@ function App() {
   },[])
 
   useEffect(() => {
-    getProducts().
-    then(res => {
+    getProducts()
+    .then(res => {
       console.log(res.data)
       const newProducts: IProduct[] = res.data
       .map(product => {
@@ -76,7 +90,7 @@ function App() {
       })
       setProducts(newProducts)      
     })
-  },[])
+  },[listId,listItems])
 
   const checkListItem = (id: string) => {
     const newItems = listItems.map(item => item.id === id ? ({ ...item, checked: !item.checked }) : item)

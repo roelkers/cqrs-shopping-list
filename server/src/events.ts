@@ -6,7 +6,6 @@ const router = express.Router();
 let clients: any[] = [];
 
 const getShoppingList = async (id: string) => {
-    console.log("id", id);
     const {rows} = await pgClient.query("SELECT product_id, product_name, list_id, category, checked from shopping_list");
     const data = rows
     .map((item: any) => ({
@@ -28,10 +27,8 @@ const getShoppingList = async (id: string) => {
 router.post("/events", async (req: Request, res: Response, next: NextFunction) => {
     const { type } = req.body;
     const event = { ...req.body };
-    console.log(event);
     if (type === "list_added") {
        const { rows } = await pgClient.query(`SELECT nextval('list_id_seq')`);
-       console.log(rows);
        event.list_id = rows[0].nextval;
     }
     await pgClient.query("INSERT INTO events(data) VALUES ($1)", [JSON.stringify(event)]);
@@ -57,7 +54,6 @@ router.get("/list-data", async (req: Request, res: Response, next: NextFunction)
     res.write("\n");
 
     const shoppingList = await getShoppingList(listId);
-    console.log(shoppingList);
     // After client opens connection send all nests as string
     const data = `data: ${JSON.stringify(shoppingList)}\n\n`;
     res.write(data);
@@ -71,19 +67,16 @@ router.get("/list-data", async (req: Request, res: Response, next: NextFunction)
         res
     };
     clients.push(newClient);
-    console.log(`New Client1: ${clientId}`);
 
     // When client closes connection we update the clients list
     // avoiding the disconnected one
     req.on("close", () => {
-        console.log(`${clientId} Connection closed`);
         clients = clients.filter((c) => c.id !== clientId);
     });
 });
 
 // Iterate clients list and use write res object method to send new nest
 async function sendEventsToAll(listId: string) {
-    console.log("sending event to all clients");
     const data = await getShoppingList(listId);
 
     clients.forEach((c) => { c.res.write(`data: ${JSON.stringify(data)}\n\n`); c.res.flush(); });

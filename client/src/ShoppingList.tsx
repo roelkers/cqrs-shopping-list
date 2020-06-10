@@ -28,22 +28,26 @@ const useStyles = makeStyles((theme) => {
     },
     listItem: {
       "&:hover, &.Mui-focusVisible": { background: theme.palette.primary.light! }
+    },
+    list: {
+      overflow: 'auto',
+      maxHeight: 'calc(100vh - 117px)'
     }
   })
 });
 
 export default function ShoppingList(props: ShoppingListProps) {
-  const { listItems,listId,setListId } = props
-  const { listItem, listItemChecked } = useStyles()
+  const { listItems, listId, setListId } = props
+  const { listItem, listItemChecked, list } = useStyles()
 
   useEffect(() => {
     //check if list id from route is the same as current list id,
     //if not then change it to the currently selected
     console.log(props.id)
-    if(props.id && props.id !== listId) setListId(props.id)
-  },[listId,setListId])
+    if (props.id && props.id !== listId) setListId(props.id)
+  }, [listId, setListId, props.id])
 
-  const handleClick =  (item: IShoppingItem) => {
+  const handleClick = (item: IShoppingItem) => {
     props.checkListItem(item.id)
     const payload = {
       list_id: props.listId,
@@ -59,15 +63,15 @@ export default function ShoppingList(props: ShoppingListProps) {
   }
 
   return (
-    <Box >
+    <Box>
       <Box p={2}>
         <MuiLink align='center' display='block' component={Link} to='edit'>Bearbeiten</MuiLink>
       </Box>
-      <List>
+      <List className={list}>
         {
           listItems.map((item) => {
             return (
-              <ListItem onClick={() => handleClick(item)} key={item.id} className={clsx(listItem, item.checked ? listItemChecked: '')} button>
+              <ListItem onClick={() => handleClick(item)} key={item.id} className={clsx(listItem, item.checked ? listItemChecked : '')} button>
                 <ListItemIcon>
                   <LocalCafeIcon />
                 </ListItemIcon>

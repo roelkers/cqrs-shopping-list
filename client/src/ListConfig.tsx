@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Box from '@material-ui/core/Box'
 import { RouteComponentProps, Link } from "@reach/router"
 import { IShoppingItem, IProduct } from './interfaces'
-import { postEvent, getProducts } from './client'
+import { postEvent } from './client'
 import ListItem from '@material-ui/core/ListItem'
 import MuiLink from '@material-ui/core/Link'
 import List from '@material-ui/core/List'
@@ -30,13 +30,17 @@ const useStyles = makeStyles((theme) => {
     },
     chipContainer: {
       overflowX: 'auto',
+    },
+    list: {
+      overflow: 'auto',
+      maxHeight: 'calc(100vh - 135px)'
     }
   })
 });
 
 export default function Menu(props: MenuProps) {
   const { listItems, products } = props
-  const { listItem, listItemChecked, chipContainer } = useStyles()
+  const { listItem, listItemChecked, chipContainer, list } = useStyles()
   const [activeCategories, setCategories] = useState<string[]>([])
 
   const handleClick = (product: IProduct) => {
@@ -52,8 +56,8 @@ export default function Menu(props: MenuProps) {
     }
     return postEvent(payload);
   }
-  
-  const handleCategoryClick = (category : string) => {
+
+  const handleCategoryClick = (category: string) => {
     console.log(category)
     const updatedCategories = activeCategories.includes(category) ? activeCategories.filter(c => c !== category) : [...activeCategories, category]
     console.log(updatedCategories)
@@ -67,31 +71,31 @@ export default function Menu(props: MenuProps) {
         <MuiLink align='center' display='block' component={Link} to={`/list/${props.listId}`}>Fertig</MuiLink>
       </Box>
       <Box p={1} display='flex' justifyContent='flex-start' className={chipContainer}>
-        {categories.map(category => 
-         <Chip key={category}
-          icon={<LocalCafeIcon />}
-          label={category}
-          color={activeCategories.includes(category) ? 'primary' : 'default'}
-          onClick={() => handleCategoryClick(category)}
-          clickable
-         />
-      )}
+        {categories.map(category =>
+          <Chip key={category}
+            icon={<LocalCafeIcon />}
+            label={category}
+            color={activeCategories.includes(category) ? 'primary' : 'default'}
+            onClick={() => handleCategoryClick(category)}
+            clickable
+          />
+        )}
       </Box>
-     <List>
+      <List className={list}>
         {
           products
-          .filter((product: IProduct) => activeCategories.length > 0 ? activeCategories.includes(product.category) : true )
-          .map((product: IProduct) => {
-            const selected = listItems.some(item => item.id === product.id)
-            return (
-              <ListItem onClick={() => handleClick(product)} className={clsx(listItem, selected ? listItemChecked: '')} key={product.id} button>
-                <ListItemIcon>
-                  <LocalCafeIcon />
-                </ListItemIcon>
-                <ListItemText primary={product.name} />{selected && <CheckIcon />}
-              </ListItem>
-            )
-          })
+            .filter((product: IProduct) => activeCategories.length > 0 ? activeCategories.includes(product.category) : true)
+            .map((product: IProduct) => {
+              const selected = listItems.some(item => item.id === product.id)
+              return (
+                <ListItem onClick={() => handleClick(product)} className={clsx(listItem, selected ? listItemChecked : '')} key={product.id} button>
+                  <ListItemIcon>
+                    <LocalCafeIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={product.name} />{selected && <CheckIcon />}
+                </ListItem>
+              )
+            })
         }
       </List>
     </Box>
