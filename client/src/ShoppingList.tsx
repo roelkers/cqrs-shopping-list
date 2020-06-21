@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => {
     },
     list: {
       overflow: 'auto',
-      maxHeight: 'calc(100vh - 117px)'
+      maxHeight: 'calc(100vh - 140px)'
     }
   })
 });
@@ -68,7 +68,7 @@ export default function ShoppingList(props: ShoppingListProps) {
       </Box>
       <List className={list}>
         {
-          listItems.map((item) => {
+          listItems.sort((a, b) => a.category.toUpperCase() > b.category.toUpperCase() ? 1 : -1).map((item) => {
             return (
               <ListItem onClick={() => handleClick(item)} key={item.id} className={clsx(listItem, item.checked ? listItemChecked : '')} button>
                 <ListItemIcon>

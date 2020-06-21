@@ -20,9 +20,11 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Select from '@material-ui/core/Select'
+import MenuItem from '@material-ui/core/MenuItem'
 import { IShoppingList } from './interfaces'
 import { Link } from '@reach/router'
-import { postEvent } from './client'
+import { postEvent, getShoppingLists, postNewProduct } from './client'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,6 +42,8 @@ const useStyles = makeStyles((theme) => ({
 
 interface MenuProps extends RouteComponentProps {
   shoppingLists: IShoppingList[],
+  setShoppingLists : (lists: IShoppingList[]) => void
+  refetchProducts: () => void
 }
 
 export default function Menu(props: MenuProps) {
@@ -48,20 +52,15 @@ export default function Menu(props: MenuProps) {
   const [open, setOpen] = React.useState(true);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const [newProductOpen, handleNewProductOpen] = React.useState(false) 
   const [newListTitle, setNewListTitle] = React.useState('')
   const [listToDelete, selectListToDelete] = React.useState('')
+  const [newProductName, setNewProductName ] = React.useState('')
+  const [newProductCategory, setNewProductCategory ] = React.useState('')
 
-  const handleDialogOpen = () => {
-    setDialogOpen(true);
-  };
-
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-  };
-
-  const handleDeleteOpen = () => {
-    setDeleteOpen(true);
-  };
+  const handleDialogOpen = () => setDialogOpen(true);
+  const handleDialogClose = () => setDialogOpen(false);
+  const handleDeleteOpen = () => setDeleteOpen(true);
 
   const handleDeleteClose = () => {
     setDeleteOpen(false);
@@ -71,7 +70,13 @@ export default function Menu(props: MenuProps) {
     setOpen(!open);
   };
 
-  const handleNewList = () => {
+  const refetchShoppingLists = () => {
+    console.log("refetch")
+    getShoppingLists()
+    .then((res) =>  { console.log(res); props.setShoppingLists(res.data);})
+  }
+
+  const handleNewList = async () => {
     handleDialogClose()
     if (!newListTitle.trim()) return;
     setNewListTitle('')
@@ -79,18 +84,31 @@ export default function Menu(props: MenuProps) {
       type: 'list_added',
       name: newListTitle,
     }
-    return postEvent(payload);
+    await postEvent(payload);
+    return refetchShoppingLists()
   }
 
-  const handleListDelete = () => {
-    handleDialogClose()
+  const handleListDelete = async () => {
+    handleDeleteClose()
     if (!listToDelete.trim()) return;
     selectListToDelete('')
     const payload = {
       type: 'list_removed',
       list_id: listToDelete
     }
-    return postEvent(payload);
+    refetchShoppingLists()
+    await postEvent(payload);
+    return refetchShoppingLists()
+  }
+
+  const handleNewProduct = async () => {
+    handleNewProductOpen(false)
+    if (!newProductName.trim()) return;
+    if (!newProductCategory.trim()) return;
+    setNewProductName('')
+    setNewProductCategory('')
+    await postNewProduct({ newProductName, newProductCategory })
+    return props.refetchProducts() 
   }
 
   return (
@@ -130,6 +148,9 @@ export default function Menu(props: MenuProps) {
       <List component="nav" aria-label="secondary mailbox folders">
         <ListItem button>
           <ListItemText onClick={handleDeleteOpen} primary="Löschen" />
+        </ListItem>
+        <ListItem button>
+          <ListItemText onClick={() => handleNewProductOpen(true)} primary="Neues Produkt" />
         </ListItem>
       </List>
       <Dialog open={dialogOpen} onClose={handleDialogClose} aria-labelledby="form-dialog-title">
@@ -184,6 +205,53 @@ export default function Menu(props: MenuProps) {
             Zurück
           </Button>
           <Button onClick={handleListDelete} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={newProductOpen} onClose={handleNewProductOpen} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Neues Produkt</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Bitte gib den Namen des neuen Produkts ein.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            value={newProductName}
+            label="Name"
+            type="name"
+            fullWidth
+            onChange={(event) => setNewProductName(event.target.value)}
+          />
+          <DialogContentText>
+            Bitte gib die Kategorie des neuen Produkts an
+          </DialogContentText>
+          <Select 
+            id='category'
+            value={newProductCategory}
+            onChange={(evt) =>
+              { 
+                const category = evt.target.value as string
+                setNewProductCategory(category)
+            }}
+          >
+            <MenuItem value='TK'>TK</MenuItem>
+            <MenuItem value='Backwaren'>Backwaren</MenuItem>
+            <MenuItem value='Kühlwaren'>Kühlwaren</MenuItem>
+            <MenuItem value='Getränke'>Getränke</MenuItem>
+            <MenuItem value='Trockenware'>Trockenware</MenuItem>
+            <MenuItem value='Obst & Gemüse'>Obst & Gemüse</MenuItem>
+            <MenuItem value='Drogerie'>Drogerie</MenuItem>
+            <MenuItem value='Snacks'>Snacks</MenuItem>
+          </Select>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => handleNewProductOpen(false)} color="primary">
+            Zurück
+          </Button>
+          <Button onClick={handleNewProduct} color="primary">
             OK
           </Button>
         </DialogActions>

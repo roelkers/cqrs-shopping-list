@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => {
     },
     list: {
       overflow: 'auto',
-      maxHeight: 'calc(100vh - 135px)'
+      maxHeight: 'calc(100vh - 185px)'
     }
   })
 });

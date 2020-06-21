@@ -14,16 +14,19 @@ interface AppPageProps {
     listId: string,
     setListId: (id: string) => void,
     shoppingLists: IShoppingList[],
-    checkListItem: (id: string) => void
+    checkListItem: (id: string) => void,
+    setShoppingLists : (lists: IShoppingList[]) => void
+    refetchProducts: () => void
 }
 
 const useStyles = makeStyles(() => ({
     page: {
+        boxSizing: 'border-box',
         margin: '0',
         padding: '0',
         maxHeight: '100vh',
-        overflow: 'hidden',
-        position: 'relative'
+        position: 'relative',
+        paddingBottom: '10vh'
     }
 }))
 
@@ -35,7 +38,7 @@ export default function AppPage(props: AppPageProps) {
             <Router >
                 <ShoppingList listId={props.listId} listItems={props.listItems} checkListItem={props.checkListItem} setListId={props.setListId} path="/list/:id" />
                 <ListConfig products={props.products} listId={props.listId} listItems={props.listItems} path="/list/:id/edit" />
-                <Menu shoppingLists={props.shoppingLists} path="/menu" />
+                <Menu shoppingLists={props.shoppingLists} path="/menu" setShoppingLists={props.setShoppingLists} refetchProducts={props.refetchProducts} />
             </Router>
         </Box>
     )

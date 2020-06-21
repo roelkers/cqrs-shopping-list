@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useReducer } from 'react'
 import { ThemeProvider, createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles'
 import AppPage from './AppPage'
 import './App.css';
@@ -75,7 +75,7 @@ function App() {
     .then((res) => setShoppingLists(res.data))
   },[])
 
-  useEffect(() => {
+  const refetchProducts = () => {
     getProducts()
     .then(res => {
       const newProducts: IProduct[] = res.data
@@ -89,6 +89,10 @@ function App() {
       })
       setProducts(newProducts)      
     })
+  }
+
+  useEffect(() => {
+    refetchProducts()
   },[])
 
   const checkListItem = (id: string) => {
@@ -99,7 +103,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppPage products={products} shoppingLists={shoppingLists} listId={listId} setListId={setListId} listItems={listItems} checkListItem={checkListItem} />
+      <AppPage products={products} shoppingLists={shoppingLists} listId={listId} setListId={setListId} listItems={listItems} checkListItem={checkListItem} setShoppingLists={setShoppingLists} refetchProducts={refetchProducts}/>
     </ThemeProvider>
   );
 }
