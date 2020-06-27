@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Box from '@material-ui/core/Box'
 import { RouteComponentProps, Link } from "@reach/router"
-import { IShoppingItem, IProduct } from './interfaces'
+import { IProduct } from './interfaces'
 import { postEvent } from './client'
 import ListItem from '@material-ui/core/ListItem'
 import MuiLink from '@material-ui/core/Link'
@@ -13,12 +13,11 @@ import LocalCafeIcon from '@material-ui/icons/LocalCafe'
 import Chip from '@material-ui/core/Chip'
 import { makeStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
+import { useRecoilValue } from 'recoil'
+import { productsState,  listIdState } from './atoms'
+import { listItemsState } from './selectors'
 
-interface MenuProps extends RouteComponentProps {
-  listItems: IShoppingItem[],
-  listId: string,
-  products: IProduct[]
-}
+interface ListConfigProps extends RouteComponentProps {}
 
 const useStyles = makeStyles((theme) => {
   return ({
@@ -38,14 +37,16 @@ const useStyles = makeStyles((theme) => {
   })
 });
 
-export default function Menu(props: MenuProps) {
-  const { listItems, products } = props
+export default function ListConfig(props: ListConfigProps) {
   const { listItem, listItemChecked, chipContainer, list } = useStyles()
   const [activeCategories, setCategories] = useState<string[]>([])
+  const products = useRecoilValue(productsState)
+  const listItems = useRecoilValue(listItemsState)
+  const listId = useRecoilValue(listIdState)
 
   const handleClick = (product: IProduct) => {
     const payload = {
-      list_id: props.listId,
+      list_id: listId,
       product_id: product.id,
       type: ''
     }
@@ -68,7 +69,7 @@ export default function Menu(props: MenuProps) {
   return (
     <Box>
       <Box p={2}>
-        <MuiLink align='center' display='block' component={Link} to={`/list/${props.listId}`}>Fertig</MuiLink>
+        <MuiLink align='center' display='block' component={Link} to={`/list/${listId}`}>Fertig</MuiLink>
       </Box>
       <Box p={1} display='flex' justifyContent='flex-start' className={chipContainer}>
         {categories.map(category =>

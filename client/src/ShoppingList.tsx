@@ -11,13 +11,13 @@ import LocalCafeIcon from '@material-ui/icons/LocalCafe'
 import { makeStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
 import { postEvent } from './client'
+import { useRecoilState, useRecoilValue } from 'recoil'
+import { listIdState } from './atoms'
+import { listItemsState } from './selectors'
+import useListItems from './useListItems'
 
 interface ShoppingListProps extends RouteComponentProps {
-  listItems: IShoppingItem[];
-  listId: string;
   id?: string
-  setListId: (id: string) => void
-  checkListItem: (id: string) => void
 }
 
 const useStyles = makeStyles((theme) => {
@@ -37,8 +37,10 @@ const useStyles = makeStyles((theme) => {
 });
 
 export default function ShoppingList(props: ShoppingListProps) {
-  const { listItems, listId, setListId } = props
+  const [listId, setListId] = useRecoilState(listIdState)
+  const listItems = useRecoilValue(listItemsState)
   const { listItem, listItemChecked, list } = useStyles()
+  const checkListItem = useListItems()
 
   useEffect(() => {
     //check if list id from route is the same as current list id,
@@ -47,9 +49,9 @@ export default function ShoppingList(props: ShoppingListProps) {
   }, [listId, setListId, props.id])
 
   const handleClick = (item: IShoppingItem) => {
-    props.checkListItem(item.id)
+    checkListItem(item.id)
     const payload = {
-      list_id: props.listId,
+      list_id: listId,
       product_id: item.id,
       type: ''
     }
@@ -68,7 +70,7 @@ export default function ShoppingList(props: ShoppingListProps) {
       </Box>
       <List className={list}>
         {
-          listItems.sort((a, b) => a.category.toUpperCase() > b.category.toUpperCase() ? 1 : -1).map((item) => {
+          listItems.slice().sort((a, b) => a.category.toUpperCase() > b.category.toUpperCase() ? 1 : -1).map((item) => {
             return (
               <ListItem onClick={() => handleClick(item)} key={item.id} className={clsx(listItem, item.checked ? listItemChecked : '')} button>
                 <ListItemIcon>

@@ -1,10 +1,11 @@
 import React from 'react';
-import { useEffect, useState, useReducer } from 'react'
+import { useEffect } from 'react'
 import { ThemeProvider, createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles'
 import AppPage from './AppPage'
 import './App.css';
-import { createEventSource, getShoppingLists, getProducts } from './client';
-import { IShoppingItem, IShoppingList, IProduct } from './interfaces';
+import useProducts from './useProducts';
+import useListItems from './useListItems';
+import useShoppingLists from './useShoppingLists';
 
 let theme = createMuiTheme({
   palette: {
@@ -30,80 +31,19 @@ theme = responsiveFontSizes(theme)
 
 
 function App() {
-  const [listData, setListItems] = useState<Map<string,IShoppingItem[]>>(new Map());
-  const [listening, setListening] = useState(false);
-  const [listId, setListId ] = useState('1')
-  const [shoppingLists, setShoppingLists] = React.useState<IShoppingList[]>([])
-  const [products, setProducts] = useState<IProduct[]>([])
-  
-  useEffect(() => {
-    if (!listening) {
-      const eventSource = createEventSource() 
-      eventSource.onmessage = async (event) => {
-        const parsedData = JSON.parse(event.data) as any
-        const jsonResponse = new Response(event.data, {
-          headers: {
-            'content-type': 'application/json'
-          }
-        })
-        const map = new Map(Object.entries(parsedData))
-        setListItems(map);
-        //update cache if we have access to it
-        if(window.caches) {
-          const cache = await window.caches.open('shoppinglist')
-          await cache.put(`/events/${listId}`, jsonResponse ).catch(e => console.log(e))
-        }
-      };
-      eventSource.onerror = async (error) => {
-        //use cache if we have access to it
-        if(window.caches) {
-          const data = await window.caches.match(`/events/${listId}`)
-          const jsonData = await data?.json()
-          const map = new Map(Object.entries(jsonData))
-          setListItems(map);
-        }
-      }
-      
-      setListening(true);
-    }
-  }, [listening, listData, listId]);
-
-  const listItems = listData.get(listId) || [] as IShoppingItem[]
-
-  useEffect(() => {
-    getShoppingLists()
-    .then((res) => setShoppingLists(res.data))
-  },[])
-
-  const refetchProducts = () => {
-    getProducts()
-    .then(res => {
-      const newProducts: IProduct[] = res.data
-      .map(product => {
-        return ({
-          id: String(product.id),
-          name: product.product_name,
-          category: product.category,
-          selected: listItems.some(i => i.id === `${product.id}`)
-        })
-      })
-      setProducts(newProducts)      
-    })
-  }
+  const [products, refetchProducts] = useProducts()
+  const [shoppingLists ,refetchShoppingLists ] = useShoppingLists()
+  useListItems()
 
   useEffect(() => {
     refetchProducts()
+    refetchShoppingLists()
   },[])
 
-  const checkListItem = (id: string) => {
-    const newItems = listItems.map(item => item.id === id ? ({ ...item, checked: !item.checked }) : item)
-    const updatedMap = listData.set(listId,newItems) 
-    setListItems(updatedMap)
-  }
 
   return (
     <ThemeProvider theme={theme}>
-      <AppPage products={products} shoppingLists={shoppingLists} listId={listId} setListId={setListId} listItems={listItems} checkListItem={checkListItem} setShoppingLists={setShoppingLists} refetchProducts={refetchProducts}/>
+      <AppPage />
     </ThemeProvider>
   );
 }

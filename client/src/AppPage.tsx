@@ -8,16 +8,7 @@ import { IShoppingItem, IShoppingList, IProduct } from './interfaces'
 import Box from '@material-ui/core/Box'
 import { makeStyles } from '@material-ui/core'
 
-interface AppPageProps {
-    listItems: IShoppingItem[],
-    products: IProduct[],
-    listId: string,
-    setListId: (id: string) => void,
-    shoppingLists: IShoppingList[],
-    checkListItem: (id: string) => void,
-    setShoppingLists : (lists: IShoppingList[]) => void
-    refetchProducts: () => void
-}
+interface AppPageProps { }
 
 const useStyles = makeStyles(() => ({
     page: {
@@ -36,9 +27,9 @@ export default function AppPage(props: AppPageProps) {
         <Box className={page}>
             <Navbar />
             <Router >
-                <ShoppingList listId={props.listId} listItems={props.listItems} checkListItem={props.checkListItem} setListId={props.setListId} path="/list/:id" />
-                <ListConfig products={props.products} listId={props.listId} listItems={props.listItems} path="/list/:id/edit" />
-                <Menu shoppingLists={props.shoppingLists} path="/menu" setShoppingLists={props.setShoppingLists} refetchProducts={props.refetchProducts} />
+                <ShoppingList path="/list/:id" />
+                <ListConfig path="/list/:id/edit" />
+                <Menu  path="/menu" />
             </Router>
         </Box>
     )

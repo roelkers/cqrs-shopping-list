@@ -25,6 +25,10 @@ import MenuItem from '@material-ui/core/MenuItem'
 import { IShoppingList } from './interfaces'
 import { Link } from '@reach/router'
 import { postEvent, getShoppingLists, postNewProduct } from './client'
+import { useRecoilValue, useRecoilState } from 'recoil'
+import { shoppingListState } from './atoms'
+import useProducts from './useProducts'
+import useShoppingLists from './useShoppingLists'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,14 +44,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-interface MenuProps extends RouteComponentProps {
-  shoppingLists: IShoppingList[],
-  setShoppingLists : (lists: IShoppingList[]) => void
-  refetchProducts: () => void
-}
+interface MenuProps extends RouteComponentProps { }
 
 export default function Menu(props: MenuProps) {
-
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -57,6 +56,8 @@ export default function Menu(props: MenuProps) {
   const [listToDelete, selectListToDelete] = React.useState('')
   const [newProductName, setNewProductName ] = React.useState('')
   const [newProductCategory, setNewProductCategory ] = React.useState('')
+  const [products, refetchProducts] = useProducts()
+  const [shoppingLists, refetchShoppingLists] = useShoppingLists()
 
   const handleDialogOpen = () => setDialogOpen(true);
   const handleDialogClose = () => setDialogOpen(false);
@@ -69,12 +70,6 @@ export default function Menu(props: MenuProps) {
   const handleClick = () => {
     setOpen(!open);
   };
-
-  const refetchShoppingLists = () => {
-    console.log("refetch")
-    getShoppingLists()
-    .then((res) =>  { console.log(res); props.setShoppingLists(res.data);})
-  }
 
   const handleNewList = async () => {
     handleDialogClose()
@@ -108,7 +103,7 @@ export default function Menu(props: MenuProps) {
     setNewProductName('')
     setNewProductCategory('')
     await postNewProduct({ newProductName, newProductCategory })
-    return props.refetchProducts() 
+    return refetchProducts() 
   }
 
   return (
@@ -130,7 +125,7 @@ export default function Menu(props: MenuProps) {
         <Collapse in={open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {
-              props.shoppingLists.map(list => {
+              shoppingLists.map(list => {
                 return (
                   <ListItem key={list.id} component={Link} to={`/list/${list.id}`} button className={classes.nested}>
                     <ListItemIcon>
@@ -186,7 +181,7 @@ export default function Menu(props: MenuProps) {
             Welche Liste möchtest du löschen?
           </DialogContentText>
           <List>
-            {props.shoppingLists.map(list => {
+            {shoppingLists.map(list => {
               const isDeleted = listToDelete === list.id
               return (
                 <ListItem key={list.id} onClick={() => selectListToDelete(list.id)} button className={isDeleted ? classes.isDeleted : ''}>
