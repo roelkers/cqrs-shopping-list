@@ -29,7 +29,7 @@ export default function Navbar() {
               <MenuIcon />
              </IconButton>
             <Typography variant="h6" className={classes.title}>
-              Einkauf-App
+              Einkaufsliste
           </Typography>
         </Toolbar>
       </AppBar>
