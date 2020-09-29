@@ -14,21 +14,20 @@ import Chip from '@material-ui/core/Chip'
 import { makeStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
 import { useRecoilValue } from 'recoil'
-import { productsState,  listIdState } from './atoms'
+import { productsState, listIdState } from './atoms'
 import { listItemsState } from './selectors'
+import { CATEGORY_ORDER } from './constants'
 
-interface ListConfigProps extends RouteComponentProps {}
+interface ListConfigProps extends RouteComponentProps { }
 
 const useStyles = makeStyles((theme) => {
   return ({
     listItemChecked: {
       background: theme.palette.secondary.light!
     },
-    listItem: {
-      "&:hover, &.Mui-focusVisible": { background: theme.palette.primary.light! }
-    },
     chipContainer: {
-      overflowX: 'auto',
+      height: '68px',
+      overflowX: 'scroll',
     },
     list: {
       overflow: 'auto',
@@ -38,7 +37,7 @@ const useStyles = makeStyles((theme) => {
 });
 
 export default function ListConfig(props: ListConfigProps) {
-  const { listItem, listItemChecked, chipContainer, list } = useStyles()
+  const { listItemChecked, chipContainer, list } = useStyles()
   const [activeCategories, setCategories] = useState<string[]>([])
   const products = useRecoilValue(productsState)
   const listItems = useRecoilValue(listItemsState)
@@ -50,7 +49,8 @@ export default function ListConfig(props: ListConfigProps) {
       product_id: product.id,
       type: ''
     }
-    if (product.selected) {
+    const selected = listItems.some(item => item.id === product.id)
+    if (selected) {
       payload.type = 'item_removed'
     } else {
       payload.type = 'item_added'
@@ -59,9 +59,7 @@ export default function ListConfig(props: ListConfigProps) {
   }
 
   const handleCategoryClick = (category: string) => {
-    console.log(category)
-    const updatedCategories = activeCategories.includes(category) ? activeCategories.filter(c => c !== category) : [...activeCategories, category]
-    console.log(updatedCategories)
+    const updatedCategories = activeCategories.includes(category) ? activeCategories.filter(c => c !== category) : [category]
     return setCategories(updatedCategories)
   }
   const categories = Array.from(new Set(products.map(p => p.category)))
@@ -71,25 +69,32 @@ export default function ListConfig(props: ListConfigProps) {
       <Box p={2}>
         <MuiLink align='center' display='block' component={Link} to={`/list/${listId}`}>Fertig</MuiLink>
       </Box>
-      <Box p={1} display='flex' justifyContent='flex-start' className={chipContainer}>
-        {categories.map(category =>
-          <Chip key={category}
-            icon={<LocalCafeIcon />}
-            label={category}
-            color={activeCategories.includes(category) ? 'primary' : 'default'}
-            onClick={() => handleCategoryClick(category)}
-            clickable
-          />
-        )}
+      <Box p={1} display='flex' justifyContent='space-between' alignItems='space-between' flexDirection='column' flexWrap='wrap' className={chipContainer}>
+        {categories
+          .sort((a, b) =>
+            CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b)
+          )
+          .map(category =>
+            <Chip key={category}
+              icon={<LocalCafeIcon />}
+              label={category}
+              color={activeCategories.includes(category) ? 'primary' : 'default'}
+              onClick={() => handleCategoryClick(category)}
+              clickable
+            />
+          )}
       </Box>
       <List className={list}>
         {
           products
             .filter((product: IProduct) => activeCategories.length > 0 ? activeCategories.includes(product.category) : true)
+            .sort((a, b) =>
+              CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)
+            )
             .map((product: IProduct) => {
               const selected = listItems.some(item => item.id === product.id)
               return (
-                <ListItem onClick={() => handleClick(product)} className={clsx(listItem, selected ? listItemChecked : '')} key={product.id} button>
+                <ListItem onClick={() => handleClick(product)} className={clsx(selected ? listItemChecked : '')} key={product.id} >
                   <ListItemIcon>
                     <LocalCafeIcon />
                   </ListItemIcon>

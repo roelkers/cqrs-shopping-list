@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Box from '@material-ui/core/Box'
 import { RouteComponentProps, Link } from "@reach/router"
 import { IShoppingItem } from './interfaces'
@@ -15,6 +15,8 @@ import { useRecoilState, useRecoilValue } from 'recoil'
 import { listIdState } from './atoms'
 import { listItemsState } from './selectors'
 import useListItems from './useListItems'
+import { CATEGORY_ORDER } from './constants'
+import { Button } from '@material-ui/core'
 
 interface ShoppingListProps extends RouteComponentProps {
   id?: string
@@ -26,12 +28,12 @@ const useStyles = makeStyles((theme) => {
       background: theme.palette.secondary.light!,
       textDecoration: 'line-through'
     },
-    listItem: {
-      "&:hover, &.Mui-focusVisible": { background: theme.palette.primary.light! }
-    },
     list: {
       overflow: 'auto',
       maxHeight: 'calc(100vh - 140px)'
+    },
+    button: {
+      marginTop: 'auto'
     }
   })
 });
@@ -39,8 +41,9 @@ const useStyles = makeStyles((theme) => {
 export default function ShoppingList(props: ShoppingListProps) {
   const [listId, setListId] = useRecoilState(listIdState)
   const listItems = useRecoilValue(listItemsState)
-  const { listItem, listItemChecked, list } = useStyles()
+  const { listItemChecked, list, button } = useStyles()
   const checkListItem = useListItems()
+  const [displayDoneItems, setDisplayDoneItems] = useState(false)
 
   useEffect(() => {
     //check if list id from route is the same as current list id,
@@ -65,23 +68,33 @@ export default function ShoppingList(props: ShoppingListProps) {
 
   return (
     <Box>
-      <Box p={2}>
+      <Box p={2} >
         <MuiLink align='center' display='block' component={Link} to='edit'>Bearbeiten</MuiLink>
       </Box>
       <List className={list}>
         {
-          listItems.slice().sort((a, b) => a.category.toUpperCase() > b.category.toUpperCase() ? 1 : -1).map((item) => {
-            return (
-              <ListItem onClick={() => handleClick(item)} key={item.id} className={clsx(listItem, item.checked ? listItemChecked : '')} button>
-                <ListItemIcon>
-                  <LocalCafeIcon />
-                </ListItemIcon>
-                <ListItemText primary={item.name} />
-              </ListItem>
+          listItems.slice()
+            .filter(item => displayDoneItems ? !item.checked : true)
+            .sort((a, b) =>
+              CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)
             )
-          })
+            .map((item) => {
+              return (
+                <ListItem onClick={() => handleClick(item)} key={item.id} className={clsx(item.checked ? listItemChecked : '')} >
+                  <ListItemIcon>
+                    <LocalCafeIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={item.name} />
+                </ListItem>
+              )
+            })
         }
       </List>
+      <Box className={button} display='flex' justifyContent='center'>
+        <Button onClick={() => setDisplayDoneItems(!displayDoneItems)}>
+          {displayDoneItems ? 'Fertige einblenden' : 'Fertige ausblenden'}
+        </Button>
+      </Box>
     </Box>
   )
 }
