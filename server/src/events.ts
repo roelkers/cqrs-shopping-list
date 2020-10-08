@@ -6,11 +6,12 @@ const router = express.Router();
 let clients: any[] = [];
 
 const getShoppingList = async (id: string) => {
-    const {rows} = await pgClient.query("SELECT product_id, product_name, list_id, category, checked from shopping_list");
+    const {rows} = await pgClient.query("SELECT product_id, product_name, list_id, category, checked, quantity from shopping_list");
     const data = rows
     .map((item: any) => ({
         id: item.product_id,
         name: item.product_name,
+        quantity: item.quantity,
         checked: item.checked,
         category: item.category,
         list_id: item.list_id,

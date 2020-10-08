@@ -3,6 +3,7 @@ export interface IShoppingItem {
     name: string;
     checked: boolean;
     category: string;
+    quantity: number;
 }
 
 export interface IShoppingList {

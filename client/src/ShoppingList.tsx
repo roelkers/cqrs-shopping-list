@@ -34,6 +34,12 @@ const useStyles = makeStyles((theme) => {
     },
     button: {
       marginTop: 'auto'
+    },
+    listItemText: {
+      display: 'flex',
+      '& .MuiListItemText-secondary': {
+        marginLeft: '1em'
+      }
     }
   })
 });
@@ -41,7 +47,7 @@ const useStyles = makeStyles((theme) => {
 export default function ShoppingList(props: ShoppingListProps) {
   const [listId, setListId] = useRecoilState(listIdState)
   const listItems = useRecoilValue(listItemsState)
-  const { listItemChecked, list, button } = useStyles()
+  const { listItemChecked, list, button, listItemText } = useStyles()
   const checkListItem = useListItems()
   const [displayDoneItems, setDisplayDoneItems] = useState(false)
 
@@ -84,7 +90,7 @@ export default function ShoppingList(props: ShoppingListProps) {
                   <ListItemIcon>
                     <LocalCafeIcon />
                   </ListItemIcon>
-                  <ListItemText primary={item.name} />
+                  <ListItemText className={listItemText} primary={item.name} secondary={item.quantity} />
                 </ListItem>
               )
             })

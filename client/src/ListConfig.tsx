@@ -32,30 +32,78 @@ const useStyles = makeStyles((theme) => {
     list: {
       overflow: 'auto',
       maxHeight: 'calc(100vh - 185px)'
+    },
+    listItem: {
+      '&:active': {
+        'backgroundColor': 'none'   
+      }
+    },
+    listItemText: {
+      display: 'flex',
+      '& .MuiListItemText-secondary': {
+        marginLeft: '1em'
+      }
     }
   })
 });
 
+const SWIPE_THRESHOLD = 30
+
 export default function ListConfig(props: ListConfigProps) {
-  const { listItemChecked, chipContainer, list } = useStyles()
+  const { listItemChecked, chipContainer, list , listItem, listItemText } = useStyles()
   const [activeCategories, setCategories] = useState<string[]>([])
   const products = useRecoilValue(productsState)
   const listItems = useRecoilValue(listItemsState)
   const listId = useRecoilValue(listIdState)
+  const [swipeTravelStart, setSwipeTravelStart] = useState(0)
 
-  const handleClick = (product: IProduct) => {
-    const payload = {
+  // const handleClick = (product: IProduct) => {
+  //   const payload = {
+  //     list_id: listId,
+  //     product_id: product.id,
+  //     type: ''
+  //   }
+  //   const selected = listItems.some(item => item.id === product.id)
+  //   if (selected) {
+  //     payload.type = 'item_removed'
+  //   } else {
+  //     payload.type = 'item_added'
+  //   }
+  //   return postEvent(payload);
+  // }
+
+  const increaseQuantity = (product: IProduct) => {
+    const item = listItems.find(item => item.id === product.id)
+    if (!item) {
+      return postEvent({
+        list_id: listId,
+        product_id: product.id,
+        type: 'item_added'
+      })
+    }
+    return postEvent({
       list_id: listId,
       product_id: product.id,
-      type: ''
+      type: 'quantity_inc'
+    })
+  }
+
+  const decreaseQuantity = (product: IProduct) => {
+    const item = listItems.find(item => item.id === product.id)
+    if (item?.quantity! == 1) {
+      return postEvent({
+        list_id: listId,
+        product_id: product.id,
+        type: 'item_removed'
+      })
     }
-    const selected = listItems.some(item => item.id === product.id)
-    if (selected) {
-      payload.type = 'item_removed'
-    } else {
-      payload.type = 'item_added'
+    if (item?.quantity! > 1) {
+      return postEvent({
+        list_id: listId,
+        product_id: product.id,
+        type: 'quantity_dec'
+      })
     }
-    return postEvent(payload);
   }
 
   const handleCategoryClick = (category: string) => {
@@ -63,7 +111,32 @@ export default function ListConfig(props: ListConfigProps) {
     return setCategories(updatedCategories)
   }
   const categories = Array.from(new Set(products.map(p => p.category)))
-
+  const handleTouchMove = (product: IProduct) => (e: React.TouchEvent<HTMLDivElement>) => {
+  }
+  const handleTouchStart = (product: IProduct) => (e: React.TouchEvent<HTMLDivElement>) => {
+    setSwipeTravelStart(e.changedTouches[0].clientX)
+  }
+  const handleTouchEnd = (product: IProduct) => (e: React.TouchEvent<HTMLDivElement>) => {
+    if (swipeTravelStart - e.changedTouches[0].clientX > SWIPE_THRESHOLD) {
+      decreaseQuantity(product)
+    }
+    if (swipeTravelStart - e.changedTouches[0].clientX < - SWIPE_THRESHOLD) {
+      increaseQuantity(product)
+    }
+  }
+  const handleMouseMove = (product: IProduct) => (e: React.MouseEvent<HTMLDivElement>) => {
+  }
+  const handleMouseDown = (product: IProduct) => (e: React.MouseEvent<HTMLDivElement>) => {
+    setSwipeTravelStart(e.clientX)
+  }
+  const handleMouseUp = (product: IProduct) => (e: React.MouseEvent<HTMLDivElement>) => {
+    if (swipeTravelStart - e.clientX > SWIPE_THRESHOLD) {
+      decreaseQuantity(product)
+    }
+    if (swipeTravelStart - e.clientX < - SWIPE_THRESHOLD) {
+      increaseQuantity(product)
+    }
+  }
   return (
     <Box>
       <Box p={2}>
@@ -93,12 +166,27 @@ export default function ListConfig(props: ListConfigProps) {
             )
             .map((product: IProduct) => {
               const selected = listItems.some(item => item.id === product.id)
+              const quantity = listItems.find(item => item.id === product.id)?.quantity
               return (
-                <ListItem onClick={() => handleClick(product)} className={clsx(selected ? listItemChecked : '')} key={product.id} >
+                <ListItem
+                  button
+                  // classes={{
+                  //   focusVisible: selected ? listItemChecked : ''
+                  // }}
+                  focusVisibleClassName={selected ? listItemChecked : ''}
+                  className={clsx(selected ? listItemChecked : '')}
+                  key={product.id}
+                  onTouchStart={handleTouchStart(product)}
+                  onTouchMove={handleTouchMove(product)}
+                  onTouchEnd={handleTouchEnd(product)}
+                  onMouseDown={handleMouseDown(product)}
+                  onMouseMove={handleMouseMove(product)}
+                  onMouseUp={handleMouseUp(product)}
+                >
                   <ListItemIcon>
                     <LocalCafeIcon />
                   </ListItemIcon>
-                  <ListItemText primary={product.name} />{selected && <CheckIcon />}
+                  <ListItemText className={listItemText} primary={product.name} secondary={selected ? quantity : ''} />{selected && <CheckIcon />}
                 </ListItem>
               )
             })
