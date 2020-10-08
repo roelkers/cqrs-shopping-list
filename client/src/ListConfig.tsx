@@ -33,11 +33,6 @@ const useStyles = makeStyles((theme) => {
       overflow: 'auto',
       maxHeight: 'calc(100vh - 185px)'
     },
-    listItem: {
-      '&:active': {
-        'backgroundColor': 'none'   
-      }
-    },
     listItemText: {
       display: 'flex',
       '& .MuiListItemText-secondary': {
@@ -50,7 +45,7 @@ const useStyles = makeStyles((theme) => {
 const SWIPE_THRESHOLD = 30
 
 export default function ListConfig(props: ListConfigProps) {
-  const { listItemChecked, chipContainer, list , listItem, listItemText } = useStyles()
+  const { listItemChecked, chipContainer, list , listItemText } = useStyles()
   const [activeCategories, setCategories] = useState<string[]>([])
   const products = useRecoilValue(productsState)
   const listItems = useRecoilValue(listItemsState)
