@@ -1,7 +1,11 @@
-FROM node:alpine
-ENV REACT_APP_BASE_URL=localhost:5000
+FROM node:alpine as builder
 WORKDIR '/app'
 COPY ./package.json ./
-RUN yarn
+RUN yarn 
 COPY . .
-CMD ["yarn", "run", "start"]
+RUN yarn run build-docker
+
+FROM nginx
+EXPOSE 3000
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/build /usr/share/nginx/html
