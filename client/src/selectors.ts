@@ -9,6 +9,7 @@ export const listItemsState = selector<IShoppingItem[]>({
     const listData = get(listDataState) 
 
     const items = listData.get(id) || [] as IShoppingItem[]
+    console.log(items)
     return items;
   },
 });

@@ -41,12 +41,13 @@ const useListItems : () => (id: string) => void = () => {
       
       setListening(true);
     }
-  }, [listening, listData, listId]);
+  }, [listening, listId]);
 
   const checkListItem = (id: string) => {
     const newItems = listItems.map(item => item.id === id ? ({ ...item, checked: !item.checked }) : item)
-    const updatedMap = listData.set(listId,newItems) 
-    setListItems(updatedMap)
+    const newMap = new Map(listData)
+    newMap.set(listId,newItems) 
+    setListItems(newMap)
   }
 
   return checkListItem 

@@ -16,6 +16,7 @@ import clsx from 'clsx'
 import { useRecoilValue } from 'recoil'
 import { productsState, listIdState } from './atoms'
 import { listItemsState } from './selectors'
+import { Swipeable } from 'react-swipeable'
 import { CATEGORY_ORDER } from './constants'
 
 interface ListConfigProps extends RouteComponentProps { }
@@ -42,7 +43,6 @@ const useStyles = makeStyles((theme) => {
   })
 });
 
-const SWIPE_THRESHOLD = 30
 
 export default function ListConfig(props: ListConfigProps) {
   const { listItemChecked, chipContainer, list , listItemText } = useStyles()
@@ -50,7 +50,6 @@ export default function ListConfig(props: ListConfigProps) {
   const products = useRecoilValue(productsState)
   const listItems = useRecoilValue(listItemsState)
   const listId = useRecoilValue(listIdState)
-  const [swipeTravelStart, setSwipeTravelStart] = useState(0)
 
   // const handleClick = (product: IProduct) => {
   //   const payload = {
@@ -106,32 +105,7 @@ export default function ListConfig(props: ListConfigProps) {
     return setCategories(updatedCategories)
   }
   const categories = Array.from(new Set(products.map(p => p.category)))
-  const handleTouchMove = (product: IProduct) => (e: React.TouchEvent<HTMLDivElement>) => {
-  }
-  const handleTouchStart = (product: IProduct) => (e: React.TouchEvent<HTMLDivElement>) => {
-    setSwipeTravelStart(e.changedTouches[0].clientX)
-  }
-  const handleTouchEnd = (product: IProduct) => (e: React.TouchEvent<HTMLDivElement>) => {
-    if (swipeTravelStart - e.changedTouches[0].clientX > SWIPE_THRESHOLD) {
-      decreaseQuantity(product)
-    }
-    if (swipeTravelStart - e.changedTouches[0].clientX < - SWIPE_THRESHOLD) {
-      increaseQuantity(product)
-    }
-  }
-  const handleMouseMove = (product: IProduct) => (e: React.MouseEvent<HTMLDivElement>) => {
-  }
-  const handleMouseDown = (product: IProduct) => (e: React.MouseEvent<HTMLDivElement>) => {
-    setSwipeTravelStart(e.clientX)
-  }
-  const handleMouseUp = (product: IProduct) => (e: React.MouseEvent<HTMLDivElement>) => {
-    if (swipeTravelStart - e.clientX > SWIPE_THRESHOLD) {
-      decreaseQuantity(product)
-    }
-    if (swipeTravelStart - e.clientX < - SWIPE_THRESHOLD) {
-      increaseQuantity(product)
-    }
-  }
+
   return (
     <Box>
       <Box p={2}>
@@ -163,6 +137,11 @@ export default function ListConfig(props: ListConfigProps) {
               const selected = listItems.some(item => item.id === product.id)
               const quantity = listItems.find(item => item.id === product.id)?.quantity
               return (
+              <Swipeable
+                onSwipedLeft={() =>  decreaseQuantity(product)}
+                onSwipedRight={() => increaseQuantity(product)}
+                trackMouse
+              >
                 <ListItem
                   button
                   // classes={{
@@ -171,18 +150,13 @@ export default function ListConfig(props: ListConfigProps) {
                   focusVisibleClassName={selected ? listItemChecked : ''}
                   className={clsx(selected ? listItemChecked : '')}
                   key={product.id}
-                  onTouchStart={handleTouchStart(product)}
-                  onTouchMove={handleTouchMove(product)}
-                  onTouchEnd={handleTouchEnd(product)}
-                  onMouseDown={handleMouseDown(product)}
-                  onMouseMove={handleMouseMove(product)}
-                  onMouseUp={handleMouseUp(product)}
                 >
                   <ListItemIcon>
                     <LocalCafeIcon />
                   </ListItemIcon>
                   <ListItemText className={listItemText} primary={product.name} secondary={selected ? quantity : ''} />{selected && <CheckIcon />}
                 </ListItem>
+                </Swipeable>
               )
             })
         }
