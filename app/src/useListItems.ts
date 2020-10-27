@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { listDataState, listIdState } from "./atoms";
 import { createEventSource } from "./client";
 import { listItemsState } from "./selectors";
-import { IShoppingItem } from "./interfaces";
 
 const useListItems : () => (id: string) => void = () => {
   const [listData, setListItems] = useRecoilState(listDataState);
@@ -21,7 +20,7 @@ const useListItems : () => (id: string) => void = () => {
             'content-type': 'application/json'
           }
         })
-        const map = new Map(Object.entries(parsedData)) as Map<string, IShoppingItem[]>
+        const map = new Map(Object.entries(parsedData))
         setListItems(map);
         //update cache if we have access to it
         if(window.caches) {
@@ -34,7 +33,7 @@ const useListItems : () => (id: string) => void = () => {
         if(window.caches) {
           const data = await window.caches.match(`/events/${listId}`)
           const jsonData = await data?.json()
-          const map = new Map(Object.entries(jsonData)) as Map<string, IShoppingItem[]>
+          const map = new Map(Object.entries(jsonData))
           setListItems(map);
         }
       }
