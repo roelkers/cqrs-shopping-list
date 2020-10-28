@@ -30,6 +30,7 @@
   },
   "scripts": {
     "start": "REACT_APP_BASE_URL=http://localhost:5000 react-scripts start",
+    "start-remote": "REACT_APP_BASE_URL=https://shopping-list-cqrs.herokuapp.com react-scripts start",
     "build-local": "REACT_APP_BASE_URL=http://localhost:5000 react-scripts build",
     "build": "REACT_APP_BASE_URL=https://shopping-list-cqrs.herokuapp.com react-scripts build && rm -rf ../server/public/* && cp -r ./build/* ../server/public/",
     "test": "react-scripts test",

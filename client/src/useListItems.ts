@@ -31,7 +31,7 @@ const useListItems : () => (id: string) => void = () => {
       };
       eventSource.onerror = async (error) => {
         //use cache if we have access to it
-        if(window.caches) {
+        if(window.caches && !listItems) {
           const data = await window.caches.match(`/events/${listId}`)
           const jsonData = await data?.json()
           const map = new Map(Object.entries(jsonData)) as Map<string, IShoppingItem[]>
@@ -41,12 +41,14 @@ const useListItems : () => (id: string) => void = () => {
       
       setListening(true);
     }
-  }, [listening, listId]);
+  }, [listening, listItems, listId]);
 
   const checkListItem = (id: string) => {
     const newItems = listItems.map(item => item.id === id ? ({ ...item, checked: !item.checked }) : item)
     const newMap = new Map(listData)
     newMap.set(listId,newItems) 
+    console.log(newMap)
+    console.log(newItems)
     setListItems(newMap)
   }
 
