@@ -1,7 +1,7 @@
 import { useRecoilState, useRecoilValue } from "recoil"
 import { productsState } from "./atoms"
 import { getProducts } from "./client"
-import { IProduct, IShoppingItem } from "./interfaces"
+import { IProduct } from "./interfaces"
 import { listItemsState } from "./selectors"
 
 

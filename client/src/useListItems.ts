@@ -47,8 +47,6 @@ const useListItems : () => (id: string) => void = () => {
     const newItems = listItems.map(item => item.id === id ? ({ ...item, checked: !item.checked }) : item)
     const newMap = new Map(listData)
     newMap.set(listId,newItems) 
-    console.log(newMap)
-    console.log(newItems)
     setListItems(newMap)
   }
 

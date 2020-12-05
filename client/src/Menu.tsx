@@ -22,11 +22,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Select from '@material-ui/core/Select'
 import MenuItem from '@material-ui/core/MenuItem'
-import { IShoppingList } from './interfaces'
 import { Link } from '@reach/router'
-import { postEvent, getShoppingLists, postNewProduct } from './client'
-import { useRecoilValue, useRecoilState } from 'recoil'
-import { shoppingListState } from './atoms'
+import { postEvent, postNewProduct } from './client'
 import useProducts from './useProducts'
 import useShoppingLists from './useShoppingLists'
 
@@ -232,14 +229,19 @@ export default function Menu(props: MenuProps) {
                 setNewProductCategory(category)
             }}
           >
-            <MenuItem value='TK'>TK</MenuItem>
-            <MenuItem value='Backwaren'>Backwaren</MenuItem>
+            <MenuItem value='Obst'>Obst</MenuItem>
+            <MenuItem value='Gemüse'>Gemüse</MenuItem>
             <MenuItem value='Kühlwaren'>Kühlwaren</MenuItem>
-            <MenuItem value='Getränke'>Getränke</MenuItem>
+            <MenuItem value='Fleisch'>Fleisch</MenuItem>
+            <MenuItem value='TK'>TK</MenuItem>
+            <MenuItem value='Konserven'>Konserven</MenuItem>
             <MenuItem value='Trockenware'>Trockenware</MenuItem>
-            <MenuItem value='Obst & Gemüse'>Obst & Gemüse</MenuItem>
-            <MenuItem value='Drogerie'>Drogerie</MenuItem>
+            <MenuItem value='Würzwaren'>Würzwaren</MenuItem>
+            <MenuItem value='Backwaren'>Backwaren</MenuItem>
+            <MenuItem value='Backzutaten'>Backzutaten</MenuItem>
+            <MenuItem value='Getränke'>Getränke</MenuItem>
             <MenuItem value='Snacks'>Snacks</MenuItem>
+            <MenuItem value='Drogerie'>Drogerie</MenuItem>
           </Select>
         </DialogContent>
         <DialogActions>
