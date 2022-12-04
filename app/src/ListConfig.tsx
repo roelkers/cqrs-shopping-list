@@ -52,21 +52,6 @@ export default function ListConfig(props: ListConfigProps) {
   const listId = useRecoilValue(listIdState)
   const [swipeTravelStart, setSwipeTravelStart] = useState(0)
 
-  // const handleClick = (product: IProduct) => {
-  //   const payload = {
-  //     list_id: listId,
-  //     product_id: product.id,
-  //     type: ''
-  //   }
-  //   const selected = listItems.some(item => item.id === product.id)
-  //   if (selected) {
-  //     payload.type = 'item_removed'
-  //   } else {
-  //     payload.type = 'item_added'
-  //   }
-  //   return postEvent(payload);
-  // }
-
   const increaseQuantity = (product: IProduct) => {
     const item = listItems.find(item => item.id === product.id)
     if (!item) {
@@ -165,9 +150,6 @@ export default function ListConfig(props: ListConfigProps) {
               return (
                 <ListItem
                   button
-                  // classes={{
-                  //   focusVisible: selected ? listItemChecked : ''
-                  // }}
                   focusVisibleClassName={selected ? listItemChecked : ''}
                   className={clsx(selected ? listItemChecked : '')}
                   key={product.id}

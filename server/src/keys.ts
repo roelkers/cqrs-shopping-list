@@ -1,11 +1,9 @@
+import * as dotenv from "dotenv";
 import { IKeys } from "./interfaces";
+dotenv.config();
 
 const keys: IKeys = {
-  pgUser: process.env.PGUSER as string,
-  pgHost: process.env.PGHOST as string,
-  pgDatabase: process.env.PGDATABASE as string,
-  pgPassword: process.env.PGPASSWORD as string,
-  pgPort: Number(process.env.PGPORT)
+  DATABASE_URL: process.env.DB_URL as string
 };
 
 export default keys;

@@ -1,30 +1,30 @@
 version: '3'
 services:
-  server:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./server
-    volumes:
-      - /app/node_modules
-      - ./server:/app
-    environment:
-      - PGUSER=postgres
-      - PGHOST=postgres
-      - PGDATABASE=postgres
-      - PGPASSWORD=postgres_password
-      - PGPORT=5432 
-    ports:
-      - "5000:5000"
-  client:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./client
-    volumes:
-      - /app/node_modules
-      - ./client:/app
-    ports:
-      - "3000:3000"
-    stdin_open: true
+  # server:
+  #   build:
+  #     dockerfile: Dockerfile.dev
+  #     context: ./server
+  #   volumes:
+  #     - /app/node_modules
+  #     - ./server:/app
+  #   environment:
+  #     - PGUSER=postgres
+  #     - PGHOST=postgres
+  #     - PGDATABASE=postgres
+  #     - PGPASSWORD=postgres_password
+  #     - PGPORT=5432 
+  #   ports:
+  #     - "5000:5000"
+  # client:
+  #   build:
+  #     dockerfile: Dockerfile.dev
+  #     context: ./client
+  #   volumes:
+  #     - /app/node_modules
+  #     - ./client:/app
+  #   ports:
+  #     - "3000:3000"
+  #   stdin_open: true
   postgres:
     image: postgres
     restart: always

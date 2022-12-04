@@ -1,17 +1,8 @@
 import keys from "./keys";
+import { Pool } from "pg";
 
-// Postgres Client Setup
-const { Pool } = require("pg");
-const pgClient = process.env.DATABASE_URL ?
+const pgClient = 
   new Pool({
-    connectionString: process.env.DATABASE_URL
-  }) :
-  new Pool({
-    user: keys.pgUser,
-    host: keys.pgHost,
-    database: keys.pgDatabase,
-    password: keys.pgPassword,
-    port: keys.pgPort
-  });
-
+    connectionString: keys.DATABASE_URL
+  }) 
 export default pgClient;
