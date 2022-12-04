@@ -80,7 +80,7 @@ router.get("/list-data", async (req: Request, res: Response, next: NextFunction)
 async function sendEventsToAll(listId: string) {
     const data = await getShoppingList(listId);
 
-    clients.forEach((c) => { c.res.write(`data: ${JSON.stringify(data)}\n\n`); c.res.flush(); });
+    clients.forEach((c) => { c.res.write(`data: ${JSON.stringify(data)}\n\n`); });
 }
 
 router.get("/status", (req: Request, res: Response) => res.json({ clients: clients.length }));
