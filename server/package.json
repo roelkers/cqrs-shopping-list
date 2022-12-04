@@ -5,7 +5,6 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "ts-node-dev --poll src/index.ts",
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
     "prestart": "npm run build",
     "start": "node ./dist",
